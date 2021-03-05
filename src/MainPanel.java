@@ -16,11 +16,15 @@ public class MainPanel extends JPanel implements Runnable, MouseListener{
 	
 	BufferedImage background;
 	ArrayList<Moorhuhn> moorhuhnArray = new ArrayList<Moorhuhn>();
-	int x = 0;
+	ArrayList<Rectangle> hitboxArray = new ArrayList<Rectangle>();
+	int x = -40;
 	int y = 0;
 	int width = 130;
 	int height = 142;
 	Point point;
+	int clickX = 0;
+	int clickY;
+	Point click = new Point();
 	
 	public MainPanel() {
 		File file = new File("background.png");
@@ -34,6 +38,7 @@ public class MainPanel extends JPanel implements Runnable, MouseListener{
 		
 		for(int i=0; i<10; i++) {
 			moorhuhnArray.add(new Moorhuhn(x,y));
+			hitboxArray.add(new Rectangle(x,y,width,height));
 			y += 100;
 			Runnable animation = moorhuhnArray.get(i).new Animation(moorhuhnArray.get(i));
 			Thread animationThread = new Thread(animation);
@@ -69,6 +74,9 @@ public class MainPanel extends JPanel implements Runnable, MouseListener{
 				moorhuhnArray.get(0).setIsFlying(false);
 				moorhuhnArray.get(0).kill();
 			}
+			for(int i=0; i<10; i++) {
+				hitboxArray.get(i).setBounds(new Rectangle(moorhuhnArray.get(i).getX(), moorhuhnArray.get(i).getY(), width, height));
+			}
 		}
 		
 	}
@@ -76,6 +84,16 @@ public class MainPanel extends JPanel implements Runnable, MouseListener{
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
+		click = e.getPoint();
+		for(int i=0; i<10; i++) {
+			if(hitboxArray.get(i).contains(click)) {
+				System.out.println("Clicked " + i);
+				moorhuhnArray.get(i).kill();
+				moorhuhnArray.get(i).setIsFlying(false);
+			}
+		}
+//		System.out.println("Click: x: " + e.getX() + " y: " + e.getY());
+//		System.out.println("Pic: x: " + moorhuhnArray.get(0).getX() + " y: " + moorhuhnArray.get(0).getY());
 	}
 
 	@Override
