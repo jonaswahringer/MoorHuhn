@@ -6,6 +6,7 @@ public class MainWindow extends JFrame{
 		super("Moorhuhn");
 		this.setBounds(100,100,1000,700);
 		this.setResizable(false);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		this.setContentPane(new MainPanel());
 		
