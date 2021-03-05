@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -15,38 +16,28 @@ import javax.swing.JPanel;
 public class MainPanel extends JPanel implements Runnable, MouseListener{
 	
 	BufferedImage background;
-	ArrayList<Moorhuhn> moorhuhnArray = new ArrayList<Moorhuhn>();
-	ArrayList<Rectangle> hitboxArray = new ArrayList<Rectangle>();
-	int x = -40;
-	int y = 0;
-	int width = 130;
-	int height = 142;
+	ArrayList<Moorhuhn> moorhuhnArray = new ArrayList<>();
+	ArrayList<Rectangle> hitboxArray = new ArrayList<>();
 	Point point;
-	int clickX = 0;
-	int clickY;
 	Point click = new Point();
+	int clickX = 0;
+	int clickY = 0;
+	int chickenCount;
+	int[] xValues = new int[20];
+	int[] yValues = new int[20];
+	int speedValues[] = new int[20];
+	int width, height;
 	
 	public MainPanel() {
-		File file = new File("background.png");
+		this.setBounds(0, 100, 1000, 670);
+		initFile();
+		setAttributeValues();
+		createChickens();
+		
+		
 		this.addMouseListener(this);
-		try {
-			background = ImageIO.read(file);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
-		for(int i=0; i<10; i++) {
-			moorhuhnArray.add(new Moorhuhn(x,y));
-			hitboxArray.add(new Rectangle(x,y,width,height));
-			y += 100;
-			Runnable animation = moorhuhnArray.get(i).new Animation(moorhuhnArray.get(i));
-			Thread animationThread = new Thread(animation);
-			animationThread.start();
-		}
-		
-		Runnable update = this;
-		Thread updateThread = new Thread(update);
+		Thread updateThread = new Thread(this);
 		updateThread.start();
 	}
 	
@@ -63,35 +54,70 @@ public class MainPanel extends JPanel implements Runnable, MouseListener{
 		// TODO Auto-generated method stub
 		while(true) {
 			try {
-				TimeUnit.NANOSECONDS.sleep(1000);
+				Thread.sleep(0,10);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 //			System.out.println("updated");
-			this.repaint();
-			if(moorhuhnArray.get(0).getX() == 700) {
-				moorhuhnArray.get(0).setIsFlying(false);
-				moorhuhnArray.get(0).kill();
-			}
-			for(int i=0; i<10; i++) {
+			
+			for(int i=0; i<chickenCount; i++) {
 				hitboxArray.get(i).setBounds(new Rectangle(moorhuhnArray.get(i).getX(), moorhuhnArray.get(i).getY(), width, height));
 			}
+			this.repaint();
 		}
 		
+	}
+	
+	public void initFile() {
+		File file = new File("images/background.png");
+		try {
+			background = ImageIO.read(file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void setAttributeValues() {
+		chickenCount=5;
+		width = 100;
+		height = 100;
+		
+		for(int i=0; i<chickenCount; i++) {
+			if(xValues[i]+50 > xValues[i+1]) {
+				xValues[i] = ThreadLocalRandom.current().nextInt(-40, 30 + 1);
+				yValues[i] = ThreadLocalRandom.current().nextInt(0, 900 + 1);
+				speedValues[i] = ThreadLocalRandom.current().nextInt(1, 3 + 1);
+			}
+			
+			
+		}
+	}
+	
+	public void createChickens() {
+		for(int i=0; i<chickenCount; i++) {
+			moorhuhnArray.add(new Moorhuhn(xValues[i],yValues[i], speedValues[i]));
+			hitboxArray.add(new Rectangle(xValues[i],yValues[i],width,height));
+			Runnable animation = moorhuhnArray.get(i).new Animation(moorhuhnArray.get(i));
+			Thread animationThread = new Thread(animation);
+			animationThread.start();
+		}
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
 		click = e.getPoint();
-		for(int i=0; i<10; i++) {
+		for(int i=0; i<chickenCount; i++) {
 			if(hitboxArray.get(i).contains(click)) {
 				System.out.println("Clicked " + i);
 				moorhuhnArray.get(i).kill();
 				moorhuhnArray.get(i).setIsFlying(false);
+				//hitboxArray.set(i, null);
 			}
 		}
+		
 //		System.out.println("Click: x: " + e.getX() + " y: " + e.getY());
 //		System.out.println("Pic: x: " + moorhuhnArray.get(0).getX() + " y: " + moorhuhnArray.get(0).getY());
 	}

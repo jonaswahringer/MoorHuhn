@@ -8,7 +8,8 @@ public class MainWindow extends JFrame{
 		this.setResizable(false);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		this.setContentPane(new MainPanel());
+		this.add(new MainPanel());
+		this.add(new MenuPanel());
 		
 		this.setVisible(true);
 	}

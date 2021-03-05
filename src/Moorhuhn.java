@@ -1,26 +1,31 @@
 import java.awt.Image;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 public class Moorhuhn {
-	int x, y;
-	Image img;
-	Boolean isFlying = true;
+	private Image img;
+	private Boolean isFlying = true;
+	private int x, y;
+	private int speed;
 	
+
 	{
-		img = new ImageIcon("moorhuhn.gif").getImage();
+		img = new ImageIcon("images/moorhuhn.gif").getImage();
 	}
 
-	public Moorhuhn(int x, int y) {
+	public Moorhuhn(int x, int y, int speed) {
 		this.x = x;
 		this.y = y;
+		this.speed = speed;
 	}
 	
 	public Moorhuhn() {
 		this.x = 0;
 		this.y = 0;
+		this.speed = 1;
 	}
 
 	public int getX() {
@@ -55,15 +60,37 @@ public class Moorhuhn {
 		this.isFlying = isFlying;
 	}
 	
-	public void move() {
-		this.x++;
+	public int getSpeed() {
+		return speed;
 	}
+
+	public void setSpeed(int speed) {
+		this.speed = speed;
+	}
+	
+	
+	
+	public void move() {
+		this.x+=speed;
+	}
+	
 	
 	public void kill() {
-		img = new ImageIcon("explode.gif").getImage();
+		new Thread(()->{
+			try {
+				img = new ImageIcon("images/explode.gif").getImage();
+				Thread.sleep(500);
+				img.flush();
+				img = null;
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}).start();
 	}
 	
-	class Animation extends JPanel implements Runnable{
+	class Animation extends JPanel implements Runnable {
 		
 		Moorhuhn moorhuhn;
 		
@@ -77,7 +104,7 @@ public class Moorhuhn {
 			while(isFlying) {
 				moorhuhn.move();
 				try {
-					TimeUnit.MILLISECONDS.sleep(10);
+					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
