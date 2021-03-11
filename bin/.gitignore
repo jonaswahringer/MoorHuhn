@@ -1,6 +1,4 @@
-/Main.class
-/MainPanel.class
-/MainWindow.class
-/Moorhuhn$Animation.class
-/Moorhuhn.class
-/MenuPanel.class
+/SettingsPanel.class
+/MenuPanel$StartButtonListener.class
+/MenuPanel$Animation.class
+/MenuPanel$SettingsButtonListener.class

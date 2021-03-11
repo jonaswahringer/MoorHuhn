@@ -1,4 +1,7 @@
+import java.awt.Color;
+
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 public class MainWindow extends JFrame{
 
@@ -8,8 +11,8 @@ public class MainWindow extends JFrame{
 		this.setResizable(false);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		this.add(new MainPanel());
 		this.add(new MenuPanel());
+//		this.add(new MainPanel());
 		
 		this.setVisible(true);
 	}
