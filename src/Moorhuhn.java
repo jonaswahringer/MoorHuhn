@@ -102,7 +102,7 @@ public class Moorhuhn {
 	
 	public void playKillSound() {
 		try {
-			audioIn = AudioSystem.getAudioInputStream(new File("sounds/kill.wav"));
+			//audioIn = AudioSystem.getAudioInputStream(new File("sounds/kill.wav"));
 			clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);

@@ -51,7 +51,6 @@ public class SettingsPanel extends JPanel implements Runnable {
 //		
 //		this.add(mainPanel, BorderLayout.NORTH);
 		
-		
 		mainPanel = new JPanel();
 		mainPanel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
 		

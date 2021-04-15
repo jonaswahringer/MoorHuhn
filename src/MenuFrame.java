@@ -102,7 +102,7 @@ public class MenuFrame extends JFrame {
 	public void playClickSound() {
 
 		try {
-			audioIn = AudioSystem.getAudioInputStream(new File("sounds/click2.wav"));
+			//audioIn = AudioSystem.getAudioInputStream(new File("sounds/click2.wav"));
 			clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
