@@ -1,23 +1,18 @@
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
@@ -33,13 +28,15 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	int clickX = 0;
 	int clickY = 0;
 	int chickenCount;
-	int lebenCount = 3;
-	int munitionCount = 5;
 	int[] xValues = new int[100];
 	int[] yValues = new int[100];
 	int speedValues[] = new int[100];
 	int width, height;
 	int difficultyLevel = 1;
+	int livesAvailable = 3;
+	Boolean isPlayerAlive = true;
+	Boolean bulletFlag=true;
+	int currentAmmo=3;
 
 	Action keyListener;
 
@@ -62,12 +59,12 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		super.paintComponent(g);
 		g.drawImage(background, 0, 0, background.getWidth(), background.getHeight(), null);
 		int x = 10;
-		for (int i=0;i<lebenCount;i++) {
+		for (int i=0;i<livesAvailable;i++) {
 			g.drawImage(heart,x,10,heart.getWidth(),heart.getHeight(),null);
 			x = x + heart.getWidth() + 10;
 		}
 		int x1 = 1000 - munition.getWidth();
-		for (int i=0;i<lebenCount;i++) {
+		for (int i=0;i<currentAmmo;i++) {
 			g.drawImage(munition,x1,10,munition.getWidth(),munition.getHeight(),null);
 			x1 = x1 - munition.getWidth() - 10;
 		}
@@ -80,28 +77,39 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	public void run() {
 		// TODO Auto-generated method stub
 		while (true) {
-			try {
-				Thread.sleep(0, 10);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			Boolean bool = checkLives();
+			if(bool==true) {
+				try {
+					Thread.sleep(0, 10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	//			System.out.println("updated");
+	
+				for (int i = 0; i < chickenCount; i++) {
+					hitboxArray.get(i).setBounds(
+							new Rectangle(moorhuhnArray.get(i).getX(), moorhuhnArray.get(i).getY(), width, height));
+				}
+
+				checkAmmo();
+
+				this.requestFocus();
+				
+				keyListener = new ActionKeyListener();
+	
+				this.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "ActionKey");
+				this.getActionMap().put("ActionKey", keyListener);
+	
+				this.repaint();
 			}
-//			System.out.println("updated");
-
-			for (int i = 0; i < chickenCount; i++) {
-				hitboxArray.get(i).setBounds(
-						new Rectangle(moorhuhnArray.get(i).getX(), moorhuhnArray.get(i).getY(), width, height));
+			else {
+				System.out.println("Lost");
 			}
-
-			this.requestFocus();
-
-			keyListener = new ActionKeyListener();
-
-			this.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "ActionKey");
-			this.getActionMap().put("ActionKey", keyListener);
-
-			this.repaint();
 		}
+		
+			
+			
 
 	}
 
@@ -121,13 +129,13 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	}
 
 	public void initFile() {
-		File file = new File("images/background.png");
-		File file2 = new File("images/heart_icon.png");
-		File file3 = new File("images/munition_icon.png"); 
+		File background_file = new File("images/background.png");
+		File heart_icon_file = new File("images/heart_icon.png");
+		File munition_icon_file = new File("images/munition_icon.png"); 
 		try {
-			background = ImageIO.read(file);
-			heart = ImageIO.read(file2);
-			munition = ImageIO.read(file3);
+			background = ImageIO.read(background_file);
+			heart = ImageIO.read(heart_icon_file);
+			munition = ImageIO.read(munition_icon_file);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -135,7 +143,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	}
 
 	public void setAttributeValues() {
-		chickenCount = 10;
+		chickenCount = 3;
 		width = 100;
 		height = 100;
 
@@ -166,7 +174,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		new Thread(()->{
 			while(true) {
 				try {
-					Thread.sleep(500);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -181,7 +189,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				Thread animationThread = new Thread(animation);
 				animationThread.start();
 				chickenCount++;
-				System.out.println(chickenCount);
+				//System.out.println(chickenCount);
 			}
 		}).start();
 	}
@@ -195,21 +203,76 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		}
 	}
 
+	public Boolean checkLives() {
+		if(livesAvailable == 0) {
+			isPlayerAlive=false;
+			//showYouLostScreen();
+		}
+		else {
+			for (int i = 0; i < chickenCount; i++) {
+				if (moorhuhnArray.get(i).getX()>1000) {
+					if(moorhuhnArray.get(i).getIsFlying()==true) {
+						System.out.println("Live gone ");
+						moorhuhnArray.get(i).kill();
+						moorhuhnArray.get(i).setIsFlying(false);
+						livesAvailable--;
+						//do front end stuff
+					}
+				}
+			}
+		}
+		return isPlayerAlive;
+	}
+
+	public void checkAmmo() {
+		
+			bulletFlag=true;
+			new Thread(()->{
+				label: {
+					while(bulletFlag && currentAmmo < 3) {
+						if(currentAmmo == 0) {
+							try {
+								Thread.sleep(3000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							if(currentAmmo<3 && bulletFlag) {
+								currentAmmo++;
+								break label;
+							}
+						}
+						else {
+							System.out.println("normal i guess");
+							// bulletFlag=false;
+						}
+
+					}
+				}
+			}).start();		
+	}
+
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		click = e.getPoint();
-		for (int i = 0; i < chickenCount; i++) {
-			if (hitboxArray.get(i).contains(click)) {
-				System.out.println("Killed Chicken " + i);
-				moorhuhnArray.get(i).kill();
-				moorhuhnArray.get(i).setIsFlying(false);
-				hitboxArray.get(i).setBounds(new Rectangle(0, 0, 0, 0));
-				// hitboxArray.set(i, null);
+		if(currentAmmo>0) {
+			click = e.getPoint();
+			for (int i = 0; i < chickenCount; i++) {
+				if (hitboxArray.get(i).contains(click)) {
+					System.out.println("Killed Chicken " + i);
+					moorhuhnArray.get(i).kill();
+					moorhuhnArray.get(i).setIsFlying(false);
+					hitboxArray.get(i).setBounds(new Rectangle(0, 0, 0, 0));
+					// hitboxArray.set(i, null);
+				}
 			}
+			currentAmmo--;
+		}
+		else {
+			System.out.println("No ammo available right now");
 		}
 	}
 
