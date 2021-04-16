@@ -8,7 +8,10 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -37,7 +40,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	Boolean isPlayerAlive = true;
 	Boolean bulletFlag=true;
 	int currentAmmo=3;
-
+	int count = 3;
 	Action keyListener;
 
 	public GamePanel(GameWindow gameWindow) {
@@ -91,8 +94,6 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 					hitboxArray.get(i).setBounds(
 							new Rectangle(moorhuhnArray.get(i).getX(), moorhuhnArray.get(i).getY(), width, height));
 				}
-
-				checkAmmo();
 
 				this.requestFocus();
 				
@@ -216,6 +217,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 						moorhuhnArray.get(i).kill();
 						moorhuhnArray.get(i).setIsFlying(false);
 						livesAvailable--;
+						
 						//do front end stuff
 					}
 				}
@@ -226,30 +228,53 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 	public void checkAmmo() {
 		
-			bulletFlag=true;
-			new Thread(()->{
-				label: {
-					while(bulletFlag && currentAmmo < 3) {
-						if(currentAmmo == 0) {
-							try {
-								Thread.sleep(3000);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							if(currentAmmo<3 && bulletFlag) {
-								currentAmmo++;
-								break label;
-							}
-						}
-						else {
-							System.out.println("normal i guess");
-							// bulletFlag=false;
-						}
 
-					}
+		Timer timer = new Timer();
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				if (count > 0) {
+					count--;
+					System.out.println(count + "COUNT>0");
 				}
-			}).start();		
+
+				if (count == 0) {
+					System.out.println(count + "COUNT");
+					currentAmmo=3;
+					count=3;
+					return;
+				}
+					
+				
+				System.out.println(count);
+			}
+		};
+		timer.schedule(task, 0, 1000);
+		
+		/*bulletFlag=true;
+		new Thread(()->{
+			label: {
+				while(bulletFlag && currentAmmo < 3) {
+					if(currentAmmo == 0) {
+						try {
+							Thread.sleep(3000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(currentAmmo<3 && bulletFlag) {
+							currentAmmo++;
+							break label;
+						}
+					}
+					else {
+						System.out.println("normal i guess");
+						// bulletFlag=false;
+					}
+
+				}
+			}
+		}).start();		*/
 	}
 
 	@Override
@@ -270,6 +295,10 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				}
 			}
 			currentAmmo--;
+			if(currentAmmo==0) {
+				checkAmmo();
+			}
+			
 		}
 		else {
 			System.out.println("No ammo available right now");
