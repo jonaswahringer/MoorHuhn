@@ -1,3 +1,4 @@
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -8,7 +9,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,13 +35,15 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	int[] yValues = new int[100];
 	int speedValues[] = new int[100];
 	int width, height;
-	int difficultyLevel = 1;
+	int difficultyLevel;
 	int livesAvailable = 3;
+	int score=0;
 	Boolean isPlayerAlive = true;
 	Boolean bulletFlag=true;
 	int currentAmmo=3;
 	int count = 3;
 	Action keyListener;
+	long sleepTime=0;
 
 	public GamePanel(GameWindow gameWindow) {
 		this.setBounds(0, 100, 1000, 700);
@@ -74,6 +76,13 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		for (Moorhuhn moorhuhn : moorhuhnArray) {
 			g.drawImage(moorhuhn.getImg(), moorhuhn.getX(), moorhuhn.getY(), width, height, null);
 		}
+
+		g.setFont(new Font("TimesRoman", Font.PLAIN, 25));
+		g.drawString("Score: " + Integer.toString(score), 450, 35);
+
+		g.setFont(new Font("TimesRoman", Font.PLAIN, 15));
+		g.drawString("Level: " + Integer.toString(difficultyLevel), 450, 65);
+
 	}
 
 	@Override
@@ -105,7 +114,9 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				this.repaint();
 			}
 			else {
-				System.out.println("Lost");
+				bool=checkLives();
+				break;
+				
 			}
 		}
 		
@@ -143,14 +154,41 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		}
 	}
 
+	public void setLevel() {
+		switch (difficultyLevel) {
+			case 1: sleepTime=4000;
+			break;
+			case 2: sleepTime=3000;
+			break;
+			case 3: sleepTime=2000;
+			break;
+			case 4: sleepTime=1500;
+			break;
+			case 5: sleepTime=1000;
+			break;
+			case 6: sleepTime=800;
+			break;
+			case 7: sleepTime=600;
+			break;
+		}
+	}
+
 	public void setAttributeValues() {
-		chickenCount = 3;
+		chickenCount = 7;
 		width = 100;
 		height = 100;
+		difficultyLevel=1;
+		setLevel();	
 
 		for (int i = 0; i < chickenCount; i++) {
 			if (xValues[i] + 200 > xValues[i + 1]) {
-				xValues[i] = ThreadLocalRandom.current().nextInt(-40, 30 + 1);
+				if(false) {
+					xValues[i] = ThreadLocalRandom.current().nextInt(1000, 1010);
+					// not working yet, move-- !
+				}
+				else {
+					xValues[i] = ThreadLocalRandom.current().nextInt(-10, 10);
+				}
 				yValues[i] = ThreadLocalRandom.current().nextInt(0+height, 700-height + 1);
 				speedValues[i] = ThreadLocalRandom.current().nextInt(1, 3 + 1);
 			}
@@ -159,23 +197,20 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	}
 
 	public void createChickens() {
-		if (difficultyLevel == 1) {
-			for (int i = 0; i < chickenCount; i++) {
-				moorhuhnArray.add(new Moorhuhn(xValues[i], yValues[i], speedValues[i]));
-				hitboxArray.add(new Rectangle(xValues[i], yValues[i], width, height));
-				Runnable animation = moorhuhnArray.get(i).new Animation(moorhuhnArray.get(i));
-				Thread animationThread = new Thread(animation);
-				animationThread.start();
-			}
+		for (int i = 0; i < chickenCount; i++) {
+			moorhuhnArray.add(new Moorhuhn(xValues[i], yValues[i], speedValues[i]));
+			hitboxArray.add(new Rectangle(xValues[i], yValues[i], width, height));
+			Runnable animation = moorhuhnArray.get(i).new Animation(moorhuhnArray.get(i));
+			Thread animationThread = new Thread(animation);
+			animationThread.start();
 		}
-
 	}
 	
 	public void spawnNewChickens() {
 		new Thread(()->{
 			while(true) {
 				try {
-					Thread.sleep(3000);
+					Thread.sleep(sleepTime);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -207,18 +242,17 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	public Boolean checkLives() {
 		if(livesAvailable == 0) {
 			isPlayerAlive=false;
-			//showYouLostScreen();
+			gameWindow.changeToLost(score);
 		}
 		else {
+			
 			for (int i = 0; i < chickenCount; i++) {
-				if (moorhuhnArray.get(i).getX()>1000) {
+				if (moorhuhnArray.get(i).getX()>1020 || moorhuhnArray.get(i).getX()<(-20)){
 					if(moorhuhnArray.get(i).getIsFlying()==true) {
 						System.out.println("Live gone ");
 						moorhuhnArray.get(i).kill();
 						moorhuhnArray.get(i).setIsFlying(false);
 						livesAvailable--;
-						
-						//do front end stuff
 					}
 				}
 			}
@@ -277,6 +311,26 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		}).start();		*/
 	}
 
+	public void checkLvlUp() {
+		switch(score) {
+			case 10: difficultyLevel=2;
+			break;
+			case 20: difficultyLevel=3;
+			break;
+			case 30: difficultyLevel=4;
+			break;
+			case 40: difficultyLevel=5;
+			break;
+			case 50: difficultyLevel=6;
+			break;
+			case 60: difficultyLevel=7;
+			break;
+			case 70: difficultyLevel=8;
+			break;
+		}
+		setLevel();
+	}
+
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
@@ -291,7 +345,8 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 					moorhuhnArray.get(i).kill();
 					moorhuhnArray.get(i).setIsFlying(false);
 					hitboxArray.get(i).setBounds(new Rectangle(0, 0, 0, 0));
-					// hitboxArray.set(i, null);
+					score++;
+					checkLvlUp();
 				}
 			}
 			currentAmmo--;

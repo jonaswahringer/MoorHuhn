@@ -32,7 +32,8 @@ public class MenuFrame extends JFrame {
 	public MenuFrame() {
 		this.setBounds(300, 200, 350, 400);
 		this.setResizable(false);
-		
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);	
+	
 //		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		initFile();
 		
