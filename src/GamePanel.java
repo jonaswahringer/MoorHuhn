@@ -267,48 +267,13 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				if (count > 0) {
-					count--;
-					System.out.println(count + "COUNT>0");
+				if(currentAmmo<3) {
+					currentAmmo++;
+					System.out.println(currentAmmo);
 				}
-
-				if (count == 0) {
-					System.out.println(count + "COUNT");
-					currentAmmo=3;
-					count=3;
-					return;
-				}
-					
-				
-				System.out.println(count);
 			}
 		};
-		timer.schedule(task, 0, 1000);
-		
-		/*bulletFlag=true;
-		new Thread(()->{
-			label: {
-				while(bulletFlag && currentAmmo < 3) {
-					if(currentAmmo == 0) {
-						try {
-							Thread.sleep(3000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						if(currentAmmo<3 && bulletFlag) {
-							currentAmmo++;
-							break label;
-						}
-					}
-					else {
-						System.out.println("normal i guess");
-						// bulletFlag=false;
-					}
-
-				}
-			}
-		}).start();		*/
+		timer.schedule(task, 0, 10000);
 	}
 
 	public void checkLvlUp() {
