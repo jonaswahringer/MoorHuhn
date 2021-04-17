@@ -16,11 +16,13 @@ import javax.sound.sampled.FloatControl;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import java.awt.Graphics;
 
 
 public class SettingsPanel extends JPanel implements Runnable {
@@ -30,7 +32,7 @@ public class SettingsPanel extends JPanel implements Runnable {
 	Box box;
 	BufferedImage background;
 	JLayeredPane backgroundPane, itemPane;
-	JLabel gameTitle;
+	JLabel gameTitle, backgroundLabel;
 	JButton resumeGameButton, settingsButton, aboutButton, saveGameButton, saveAndQuitButton, quitButton;
 	File audioFile, bgImageFile;
 	AudioInputStream audioIn=null;
@@ -43,17 +45,16 @@ public class SettingsPanel extends JPanel implements Runnable {
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		initFile();
 		
-		
 		this.gameWindow = gameWindow; 
-		
-//		topPanel = new JPanel();
-//		topPanel.add(new JLabel("aslkdf"));
-//		
-//		this.add(mainPanel, BorderLayout.NORTH);
 		
 		mainPanel = new JPanel();
 		mainPanel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+		// mainPanel.setBackground(Color.green);
 		
+		backgroundLabel = new JLabel();
+		backgroundLabel.setIcon(new ImageIcon(background));
+		// mainPanel.add(backgroundLabel);
+
 		gameTitle = new JLabel("Moorhuhn");
 		gameTitle.setBounds(400, 10, 250, 10);
 		gameTitle.setBackground(Color.black);
@@ -92,8 +93,8 @@ public class SettingsPanel extends JPanel implements Runnable {
 		this.add(mainPanel, BorderLayout.SOUTH);
 		
 		
-		Thread threadForFocus = new Thread(this);
-		threadForFocus.start();
+		Thread settingsThread = new Thread(this);
+		settingsThread.start();
 				
 		this.setVisible(true);
 	}
@@ -101,12 +102,18 @@ public class SettingsPanel extends JPanel implements Runnable {
 	public void run() {
 		while(true) {
 			this.requestFocus();
-			
 			keyListener = new ActionKeyListener();		
 			
 			this.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "ActionKey");
 			this.getActionMap().put("ActionKey", keyListener );
+			this.repaint();
 		}
+	}
+
+	public void paintComponent(Graphics g) {
+		System.out.println("PAINTTTTTT");
+		super.paintComponent(g);
+		g.drawImage(background, 0, 0, background.getWidth(), background.getHeight(), null);
 	}
 	
 	public class ActionKeyListener extends AbstractAction {

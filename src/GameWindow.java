@@ -17,15 +17,16 @@ public class GameWindow extends JFrame {
 	JPanel pane;
 	GamePanel mp;
 	SettingsPanel sp;
+	LostPanel lp;
 	CardLayout cLay;
-	
+	int myScore;
+
 	public GameWindow() {
 		super("Moorhuhn");
 		this.setBounds(100,100,1000,730);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLayout(null);
-		
 		
 		cLay = new CardLayout();
 		
@@ -39,10 +40,12 @@ public class GameWindow extends JFrame {
 		
 		mp = new GamePanel(this);
 		sp = new SettingsPanel(this);
+		lp = new LostPanel(this, myScore);
 		
 		
 		pane.add(mp, "Game");
 		pane.add(sp, "Settings");
+		pane.add(lp, "Lost");
 		
 		
 		cLay.show(pane, "Game");
@@ -60,4 +63,11 @@ public class GameWindow extends JFrame {
 		cLay.show(pane, "Game");
 		mp.setFlying();
 	}
+
+	public void changeToLost(int score) {
+		System.out.println("LOST PANEL");
+		this.myScore = score;
+		cLay.show(pane, "Lost");
+	}
+
 }

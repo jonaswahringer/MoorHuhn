@@ -32,7 +32,7 @@ public class MenuPanel extends JPanel {
 
 	
 	public MenuPanel() {
-		this.setBounds(100,100,1000,700);
+		this.setBounds(100,100,1000,700);;
 		this.setBackground(Color.white);
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		initFile();
@@ -89,11 +89,8 @@ public class MenuPanel extends JPanel {
 		
 		public void actionPerformed(ActionEvent event) {
 			playClickSound();
-			startGame();
-			
-			
-	    }
-		
+			startGame();			
+	    }		
 	}
 	
 	class SettingsButtonListener implements ActionListener {
@@ -102,9 +99,7 @@ public class MenuPanel extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("No Settings available yet");
 			playClickSound();
-			
-		}
-		
+		}	
 	}
 	
 	public void playClickSound() {
@@ -123,14 +118,3 @@ public class MenuPanel extends JPanel {
 	}
 	
 }
-
-
-
-
-
-//Frame: Settings, StartButton, etc.
-//Start Button pressed -> invoke mainPanel
-//main panel esc -> invoke  menuPanel 
-
-
-//evtl FX: click, deadhuhn...
