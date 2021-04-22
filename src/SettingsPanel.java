@@ -1,13 +1,13 @@
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import javax.swing.Box;
+
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -15,25 +15,24 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import java.awt.Graphics;
-
 
 public class SettingsPanel extends JPanel implements Runnable {
 	
 	GameWindow gameWindow;
 	JPanel mainPanel, topPanel;
 	Box box;
-	BufferedImage background;
+	BufferedImage background, startImage, resumeImage, quitImage, quitSaveImage;
 	JLayeredPane backgroundPane, itemPane;
 	JLabel gameTitle, backgroundLabel;
-	JButton resumeGameButton, settingsButton, aboutButton, saveGameButton, saveAndQuitButton, quitButton;
+	JButton resumeGameButton, settingsButton, aboutButton, restartGameButton, saveAndQuitButton, quitButton;
 	File audioFile, bgImageFile;
 	AudioInputStream audioIn=null;
 	Clip clip=null;
@@ -41,61 +40,53 @@ public class SettingsPanel extends JPanel implements Runnable {
 	
 	public SettingsPanel(GameWindow gameWindow) {
 		this.setBounds(100,100,1000,700);
-		this.setBackground(Color.white);
-		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		this.setLayout(null);
 		initFile();
 		
 		this.gameWindow = gameWindow; 
 		
-		mainPanel = new JPanel();
-		mainPanel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
-		// mainPanel.setBackground(Color.green);
 		
 		backgroundLabel = new JLabel();
 		backgroundLabel.setIcon(new ImageIcon(background));
-		// mainPanel.add(backgroundLabel);
-
-		gameTitle = new JLabel("Moorhuhn");
-		gameTitle.setBounds(400, 10, 250, 10);
-		gameTitle.setBackground(Color.black);
 		
-		resumeGameButton = new JButton("Resume");
-		resumeGameButton.setSize(new Dimension(200, 200));
-		resumeGameButton.addActionListener(new ResumeButtonListener());
+		resumeGameButton = new JButton(new ImageIcon(startImage));
+		resumeGameButton.setBounds(400, 50, 200, 150);
+		resumeGameButton.addActionListener(new resumeButtonListener());
+		resumeGameButton.setBorder(BorderFactory.createEmptyBorder());
+        resumeGameButton.setOpaque(false);
+        resumeGameButton.setVisible(true);
+		this.add(resumeGameButton);
 		
-		saveGameButton = new JButton("Save Stand");
-		saveGameButton.setSize(new Dimension(200, 200));
-		saveGameButton.addActionListener(new saveButtonListener());
+		restartGameButton = new JButton(new ImageIcon(resumeImage));
+		restartGameButton.setBounds(400, 250, 200, 150);
+		restartGameButton.addActionListener(new restartButtonListener());
+		restartGameButton.setBorder(BorderFactory.createEmptyBorder());
+        restartGameButton.setOpaque(false);
+        restartGameButton.setVisible(true);
+		this.add(restartGameButton);
 		
-		saveAndQuitButton = new JButton("Quit with Save");
-		saveAndQuitButton.setSize(new Dimension(200, 200));
+		saveAndQuitButton = new JButton(new ImageIcon(quitSaveImage));
+		saveAndQuitButton.setBounds(400, 450, 200, 150);
 		saveAndQuitButton.addActionListener(new saveAndQuitButtonListener());
+		saveAndQuitButton.setBorder(BorderFactory.createEmptyBorder());
+        saveAndQuitButton.setOpaque(false);
+        saveAndQuitButton.setVisible(true);
+		this.add(saveAndQuitButton);
 		
-		quitButton = new JButton("Quit");
-		quitButton.setSize(new Dimension(200, 200));
-		quitButton.addActionListener(new quitButtonListener());
-
-		
-		box = Box.createVerticalBox();
-		box.add(resumeGameButton);
-		box.add(Box.createVerticalStrut(70));
-		
-		box.add(saveGameButton);
-		box.add(Box.createVerticalStrut(70));
-		
-		box.add(saveAndQuitButton);
-		box.add(Box.createVerticalStrut(70));
-		
-		box.add(quitButton);
-		box.add(Box.createVerticalStrut(70));
-		
-		mainPanel.add(box);
-		this.add(mainPanel, BorderLayout.SOUTH);
-		
+		quitButton = new JButton(new ImageIcon(quitImage));
+		quitButton.setBounds(400, 600, 200, 150);
+		quitButton.addActionListener(new quitButtonListener());	
+		quitButton.setBorder(BorderFactory.createEmptyBorder());
+        quitButton.setOpaque(false);
+        quitButton.setVisible(true);
+		this.add(quitButton);
+			
 		
 		Thread settingsThread = new Thread(this);
 		settingsThread.start();
 				
+		backgroundLabel.setBounds(0,0,1000,700);
+		this.add(backgroundLabel);
 		this.setVisible(true);
 	}
 
@@ -111,7 +102,6 @@ public class SettingsPanel extends JPanel implements Runnable {
 	}
 
 	public void paintComponent(Graphics g) {
-		System.out.println("PAINTTTTTT");
 		super.paintComponent(g);
 		g.drawImage(background, 0, 0, background.getWidth(), background.getHeight(), null);
 	}
@@ -123,7 +113,7 @@ public class SettingsPanel extends JPanel implements Runnable {
 		}
 	}
 	
-	class ResumeButtonListener implements ActionListener {
+	class resumeButtonListener implements ActionListener {
 		
 		public void actionPerformed(ActionEvent event) {
 			playClickSound();
@@ -132,53 +122,87 @@ public class SettingsPanel extends JPanel implements Runnable {
 		
 	}
 	
-	class saveButtonListener implements ActionListener {
+	class restartButtonListener implements ActionListener {
 			
 			public void actionPerformed(ActionEvent event) {
 				playClickSound();
-				System.out.println("Save");
+				//create new gamePanel object
+				System.out.println("Restart");
 		    }
 			
 		}
 	
 	class saveAndQuitButtonListener implements ActionListener {
 		
+		BufferedWriter bwr;
+
 		public void actionPerformed(ActionEvent event) {
+			gameWindow.mp.serialize();
+			setIsSerialized();
+			System.out.println("OBJCETS SHOULD BE SERIALIZED");
 			playClickSound();
 			System.exit(0);
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			System.out.println("Quit with Save");
 	    }
+
+		public void setIsSerialized() {
+			File file = new File("files/checkSaveStand.txt");
+  
+			try {
+				bwr = new BufferedWriter(new FileWriter(file));
+				bwr.write("yes");
+				bwr.close();
+				System.out.println("CHECK SAVE STAND SHOULD BE TRUE");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 	}
 	
 	class quitButtonListener implements ActionListener {
-		
+		BufferedWriter bwr;
+
 		public void actionPerformed(ActionEvent event) {
 			playClickSound();
+			setIsNotSerialized();
 			System.exit(0);
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			System.out.println("Quit");
 	    }
+
+		public void setIsNotSerialized() {
+			File file = new File("files/checkSaveStand.txt");
+  
+			try {
+				bwr = new BufferedWriter(new FileWriter(file));
+				bwr.write("no");
+				bwr.close();
+				System.out.println("CHECK SAVE STAND SHOULD BE TRUE");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 	}
 	
 	public void initFile() {
-		bgImageFile = new File("images/background.png");
 		try {
-			background = ImageIO.read(bgImageFile);
+			background = ImageIO.read(new File("images/background.png"));
+            startImage = ImageIO.read(new File("images/start.png"));
+			resumeImage = ImageIO.read(new File("images/start.png"));
+			quitSaveImage = ImageIO.read(new File("images/quit_and_save.png"));
+			quitImage = ImageIO.read(new File("images/quit.png"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

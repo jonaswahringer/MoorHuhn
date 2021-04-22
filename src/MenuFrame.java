@@ -1,9 +1,10 @@
-import java.awt.Color;
-import javax.swing.*;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.BoxLayout;
+import java.awt.Menu;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -11,68 +12,93 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JLayeredPane;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 
 public class MenuFrame extends JFrame {
-	BufferedImage background;
-	JLayeredPane backgroundPane, itemPane;
-	JLabel gameTitle;
-	JButton startGameButton, settingsButton, aboutButton;
-	File audioFile, bgImageFile;
+	BufferedImage backgroundImage, startImage, settingsImage, loginImage;
+	JLabel title, background;
+	JButton startGameButton, settingsButton, loginButton;
+	File audioFile, bgImageFile, startImageFile, settingsImageFile, loginImageFile;
 	AudioInputStream audioIn=null;
 	Clip clip=null;
-	
+	Menu menu;
 	
 	public MenuFrame() {
-		this.setBounds(300, 200, 350, 400);
-		this.setResizable(false);
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);	
-	
-//		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		this.setBounds(100,100,1000,730);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		initFile();
+
+		JPanel p1 = new JPanel();
+		p1.setLayout(null);
+
+		JLabel background=new JLabel("",new ImageIcon(backgroundImage),JLabel.CENTER);
 		
+		JLabel title = new JLabel("Moorhuhn");
+		p1.add(title);
+
+		//Buttons
+		// startGameButton = new JButton(new ImageIcon("heart_icon.png"));
 		
-		gameTitle = new JLabel("Moorhuhn");
-//		gameTitle.setBounds(400, 10, 250, 10);
-		gameTitle.setBackground(Color.black);
-		this.add(gameTitle);
-		
-//		this.setBorder(BorderFactory.createEmptyBorder(100, 0, 0, 0));
-		
-		startGameButton = new JButton("Start Game");
+		startGameButton = new JButton(new ImageIcon(startImage));
+		startGameButton.setContentAreaFilled(false);
+		startGameButton.setBounds(400,250,200,150);
+		startGameButton.setBorder(BorderFactory.createEmptyBorder());
+		startGameButton.setOpaque(false);
 		startGameButton.addActionListener(new StartButtonListener());
-		this.add(startGameButton);
+		startGameButton.setVisible(true);
 		
-//		this.setBorder(BorderFactory.createEmptyBorder(100, 0, 0, 0));
-		
-		settingsButton = new JButton("Settings");
+		// settingsButton = new JButton(new ImageIcon("heart_icon.png"));
+		settingsButton = new JButton(new ImageIcon(settingsImage));
+		settingsButton.setContentAreaFilled(false);
+		settingsButton.setBorder(BorderFactory.createEmptyBorder());
+		settingsButton.setBounds(415,400,75,82);
+		settingsButton.setOpaque(false);	
 		settingsButton.addActionListener(new SettingsButtonListener());
-//		this.add(settingsButton);		
+		settingsButton.setVisible(true);
+
+		loginButton = new JButton(new ImageIcon(loginImage));
+		loginButton.setContentAreaFilled(false);
+		loginButton.setBorder(BorderFactory.createEmptyBorder());
+		loginButton.setBounds(520,400,75,82);
+		loginButton.setOpaque(false);	
+		loginButton.addActionListener(new SettingsButtonListener());
+		loginButton.setVisible(true);
 		
+
+		p1.add(startGameButton);
+		p1.add(settingsButton);
+		p1.add(loginButton);
+		
+		background.setBounds(0,0,1000,700);
+		p1.add(background);
+
+		p1.setVisible(true);
+		// Menu.setVisible(true);
+		this.add(p1);
 		this.setVisible(true);
 	}
 	
 	public void startGame() {
-		GameWindow mw = new GameWindow();
+		new GameWindow();
 		this.dispose();
-//		mw.getContentPane().removeAll();
-//		mw.add(new MainPanel());
-//		mw.revalidate();
-//		mw.repaint();
 	}
 	
 	public void initFile() {
-		bgImageFile = new File("images/background.png");
+		bgImageFile = new File("images/mh.png");
+		startImageFile = new File("images/start.png");
+		settingsImageFile = new File("images/settings.png");
+		loginImageFile = new File("images/login.png");
+
 		try {
-			background = ImageIO.read(bgImageFile);
+			backgroundImage = ImageIO.read(bgImageFile);
+			startImage = ImageIO.read(startImageFile);
+			settingsImage = ImageIO.read(settingsImageFile);
+			loginImage = ImageIO.read(loginImageFile);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -82,9 +108,7 @@ public class MenuFrame extends JFrame {
 		
 		public void actionPerformed(ActionEvent event) {
 			playClickSound();
-			startGame();
-			
-			
+			startGame();			
 	    }
 		
 	}
@@ -95,15 +119,13 @@ public class MenuFrame extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("No Settings available yet");
 			playClickSound();
-			
-		}
-		
+		}		
 	}
 	
 	public void playClickSound() {
 
 		try {
-			//audioIn = AudioSystem.getAudioInputStream(new File("sounds/click2.wav"));
+			audioIn = AudioSystem.getAudioInputStream(new File("sounds/click2.wav"));
 			clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);

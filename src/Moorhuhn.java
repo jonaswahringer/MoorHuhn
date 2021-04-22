@@ -1,18 +1,16 @@
 import java.awt.Image;
-import javax.sound.sampled.*;
 import java.io.File;
+import java.io.Serializable;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.util.Timer;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 
-public class Moorhuhn {
+public class Moorhuhn implements Serializable {
 	private Image img;
 	private Boolean isFlying = true;
 	private int x, y;
@@ -93,7 +91,6 @@ public class Moorhuhn {
 					img = null;
 				}
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}).start();
@@ -102,7 +99,7 @@ public class Moorhuhn {
 	
 	public void playKillSound() {
 		try {
-			//audioIn = AudioSystem.getAudioInputStream(new File("sounds/kill.wav"));
+			audioIn = AudioSystem.getAudioInputStream(new File("sounds/kill.wav"));
 			clip = AudioSystem.getClip();
 			clip.open(audioIn);
 			FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
@@ -123,17 +120,13 @@ public class Moorhuhn {
 		
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			while(isFlying) {
 				moorhuhn.move();
-//				System.out.println("x:" + moorhuhn.getX() + "\ty:" + moorhuhn.getY());
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-//				System.out.println("x: " + moorhuhn.getX() + " y: " + moorhuhn.getY());
 			}
 			
 		}

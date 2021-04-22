@@ -7,12 +7,23 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
+
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -24,6 +35,9 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	BufferedImage background;
 	BufferedImage heart;
 	BufferedImage munition;
+	BufferedReader br;
+	BufferedWriter bwr;
+	HashMap<Integer, Object> serMap = new HashMap<>();
 	ArrayList<Moorhuhn> moorhuhnArray = new ArrayList<>();
 	ArrayList<Rectangle> hitboxArray = new ArrayList<>();
 	Point point;
@@ -35,7 +49,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	int[] yValues = new int[100];
 	int speedValues[] = new int[100];
 	int width, height;
-	int difficultyLevel;
+	int difficultyLevel=1;
 	int livesAvailable = 3;
 	int score=0;
 	Boolean isPlayerAlive = true;
@@ -43,22 +57,27 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	int currentAmmo=3;
 	int count = 3;
 	Action keyListener;
-	long sleepTime=0;
+	long sleepTime=4000;
+	Boolean saveStand;
+	String savestandString;
 
 	public GamePanel(GameWindow gameWindow) {
 		this.setBounds(0, 100, 1000, 700);
 		initFile();
 		setAttributeValues();
+		checkIfSerialized();
 		createChickens();
 		spawnNewChickens();
+		setSaveStandToNo();
 
 		this.gameWindow = gameWindow;
-
 		this.addMouseListener(this);
 
 		Thread updateThread = new Thread(this);
 		updateThread.start();
 	}
+
+	
 
 	public void paint(Graphics g) {
 		super.paintComponent(g);
@@ -87,14 +106,12 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		while (true) {
 			Boolean bool = checkLives();
 			if(bool==true) {
 				try {
 					Thread.sleep(0, 10);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	//			System.out.println("updated");
@@ -119,21 +136,104 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				
 			}
 		}
-		
 			
-			
-
 	}
+
+	public void setSaveStandToNo() {
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter("files/checkSaveStand.txt");
+			writer.print("no");
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void checkIfSerialized() {
+		File file = new File("files/checkSaveStand.txt");
+  
+		try {
+			br = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			savestandString = br.readLine();
+			System.out.println(savestandString);
+			if(savestandString.equals("yes")) {
+				deSerialize();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	public void serialize() {
+        try {
+			FileOutputStream fs = new FileOutputStream("files/serialized.txt");
+			ObjectOutputStream os = new ObjectOutputStream(fs);
+
+			serMap.put(1, livesAvailable);
+			serMap.put(2, score);
+			serMap.put(3, currentAmmo);
+			serMap.put(4, difficultyLevel);
+			// serMap.put(5, moorhuhnArray);
+			// serMap.put(6, hitboxArray);
+
+			os.writeObject(serMap);
+			os.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void deSerialize() {
+		HashMap<Integer, Object> map = null;
+		// ArrayList<Moorhuhn> tempMoorhuhns =  new ArrayList<>();
+		// ArrayList<Rectangle> tempHitboxen = new ArrayList<>();
+
+		try {
+                FileInputStream fis = new FileInputStream("files/serialized.txt");
+                ObjectInputStream ois = new ObjectInputStream(fis);
+
+				map = (HashMap<Integer, Object>) ois.readObject();				
+                ois.close();
+        }
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		for(int h=1; h<=6; h++) {
+			switch(h) {
+				case 1: this.livesAvailable=(int) map.get(1);
+				break;
+				case 2: this.score=(int) map.get(2);
+				break;
+				case 3: this.currentAmmo=(int) map.get(3);
+				break;
+				case 4: this.difficultyLevel = (int) map.get(4);
+				setLevel();
+				break;
+				// case 5: tempMoorhuhns = (Arraylist<Rectangle>) map.get(5);
+				// break;
+			}
+		}
+
+    }
 
 	public class ActionKeyListener extends AbstractAction {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("ESC key got pressed!!!");
+			System.out.println("ESC pressed");
 			System.out.println(moorhuhnArray.get(0).getIsFlying());
 			for (int i = 0; i < chickenCount; i++) {
 				moorhuhnArray.get(i).setIsFlying(false);
-			}
+			}			
 			gameWindow.changeToSettings();
 
 		}
@@ -149,13 +249,12 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 			heart = ImageIO.read(heart_icon_file);
 			munition = ImageIO.read(munition_icon_file);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	public void setLevel() {
-		switch (difficultyLevel) {
+		switch(difficultyLevel) {
 			case 1: sleepTime=4000;
 			break;
 			case 2: sleepTime=3000;
@@ -170,6 +269,12 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 			break;
 			case 7: sleepTime=600;
 			break;
+			case 8: sleepTime=550;
+			break;
+			case 9: sleepTime=500;
+			break;
+			case 10: sleepTime=400;
+			break;
 		}
 	}
 
@@ -177,22 +282,13 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		chickenCount = 7;
 		width = 100;
 		height = 100;
-		difficultyLevel=1;
-		setLevel();	
 
 		for (int i = 0; i < chickenCount; i++) {
 			if (xValues[i] + 200 > xValues[i + 1]) {
-				if(false) {
-					xValues[i] = ThreadLocalRandom.current().nextInt(1000, 1010);
-					// not working yet, move-- !
-				}
-				else {
-					xValues[i] = ThreadLocalRandom.current().nextInt(-10, 10);
-				}
+				xValues[i] = ThreadLocalRandom.current().nextInt(-10, 10);
 				yValues[i] = ThreadLocalRandom.current().nextInt(0+height, 700-height + 1);
 				speedValues[i] = ThreadLocalRandom.current().nextInt(1, 3 + 1);
 			}
-
 		}
 	}
 
@@ -212,10 +308,9 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				try {
 					Thread.sleep(sleepTime);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				int x = ThreadLocalRandom.current().nextInt(-40, 30 + 1);
+				int x = ThreadLocalRandom.current().nextInt(-40, 10 + 1);
 				int y = ThreadLocalRandom.current().nextInt(0+height, 700-height + 1);
 				int speed = ThreadLocalRandom.current().nextInt(1, 3 + 1);
 				Moorhuhn newHuhn = new Moorhuhn(x, y, speed);
@@ -225,7 +320,6 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				Thread animationThread = new Thread(animation);
 				animationThread.start();
 				chickenCount++;
-				//System.out.println(chickenCount);
 			}
 		}).start();
 	}
@@ -247,7 +341,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		else {
 			
 			for (int i = 0; i < chickenCount; i++) {
-				if (moorhuhnArray.get(i).getX()>1020 || moorhuhnArray.get(i).getX()<(-20)){
+				if (moorhuhnArray.get(i).getX()>1020){
 					if(moorhuhnArray.get(i).getIsFlying()==true) {
 						System.out.println("Live gone ");
 						moorhuhnArray.get(i).kill();
@@ -261,54 +355,17 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	}
 
 	public void checkAmmo() {
-		
-
 		Timer timer = new Timer();
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				if (count > 0) {
-					count--;
-					System.out.println(count + "COUNT>0");
+				if(currentAmmo<3) {
+					currentAmmo++;
+					System.out.println(currentAmmo);
 				}
-
-				if (count == 0) {
-					System.out.println(count + "COUNT");
-					currentAmmo=3;
-					count=3;
-					return;
-				}
-					
-				
-				System.out.println(count);
 			}
 		};
-		timer.schedule(task, 0, 1000);
-		
-		/*bulletFlag=true;
-		new Thread(()->{
-			label: {
-				while(bulletFlag && currentAmmo < 3) {
-					if(currentAmmo == 0) {
-						try {
-							Thread.sleep(3000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						if(currentAmmo<3 && bulletFlag) {
-							currentAmmo++;
-							break label;
-						}
-					}
-					else {
-						System.out.println("normal i guess");
-						// bulletFlag=false;
-					}
-
-				}
-			}
-		}).start();		*/
+		timer.schedule(task, 0, 10000);
 	}
 
 	public void checkLvlUp() {
@@ -327,6 +384,12 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 			break;
 			case 70: difficultyLevel=8;
 			break;
+			case 80: difficultyLevel=9;
+			break;
+			case 90: difficultyLevel=10;
+			break;
+			case 100: difficultyLevel=11;
+			break;
 		}
 		setLevel();
 	}
@@ -341,7 +404,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 			click = e.getPoint();
 			for (int i = 0; i < chickenCount; i++) {
 				if (hitboxArray.get(i).contains(click)) {
-					System.out.println("Killed Chicken " + i);
+					// System.out.println("Killed Chicken " + i);
 					moorhuhnArray.get(i).kill();
 					moorhuhnArray.get(i).setIsFlying(false);
 					hitboxArray.get(i).setBounds(new Rectangle(0, 0, 0, 0));
@@ -362,20 +425,14 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 }
