@@ -1,47 +1,66 @@
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Color;
+
+import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class LostPanel extends JPanel implements MouseListener {
     GameWindow gameWindow;
-    private BufferedImage background;
+    JLabel backgroundLabel;
+    BufferedImage background, restartImage;
     int score;
-    
+    JButton restartGameButton;
     
     public LostPanel(GameWindow gameWindow, int score) {
         this.setBounds(0, 100, 1000, 700);
-        
+        this.setLayout(null);
+        initFile();
+
         this.gameWindow = gameWindow;
         this.score = score;
 
-		this.addMouseListener(this);
-        initFile();
-        
-        this.repaint();
+	    
 
+		backgroundLabel = new JLabel("",new ImageIcon(background),JLabel.CENTER);
+        
+		this.addMouseListener(this);
+        
+        restartGameButton = new JButton(new ImageIcon(restartImage));
+        restartGameButton.setBounds(400, 300, 200, 150);
+		restartGameButton.addActionListener(new restartButtonListener());
+        restartGameButton.setBorder(BorderFactory.createEmptyBorder());
+        restartGameButton.setOpaque(false);
+        restartGameButton.setVisible(true);
+		this.add(restartGameButton);
+
+        backgroundLabel.setBounds(0,0,1000,700);
+        this.add(backgroundLabel);
         this.setVisible(true);
     }
 
     public void initFile() {
-		File background_file = new File("images/background.png");
 		try {
-			background = ImageIO.read(background_file);
+			background = ImageIO.read(new File("images/lost_screen.png"));
+            restartImage = ImageIO.read(new File("images/start.png"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(background, 0, 0, background.getWidth(), background.getHeight(), null);
-
         g.setFont(new Font("TimesRoman", Font.PLAIN, 50));
         g.setColor(Color.black);
         g.drawString("You Lost", 0, 0);
@@ -49,47 +68,34 @@ public class LostPanel extends JPanel implements MouseListener {
         g.drawString("Score: " + Integer.toString(score), 0, 0);
     }
 
-    public class ActionKeyListener extends AbstractAction {
+    public class restartButtonListener extends AbstractAction {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("ESC");
-			gameWindow.changeToSettings();
-
+            System.out.println("Restart Game");
+            //create new gamePanel object
 		}
 
 	}
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
+    public void mousePressed(MouseEvent e) {        
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
+    public void mouseReleased(MouseEvent e) {        
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
+    public void mouseEntered(MouseEvent e) {   
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    
+    public void mouseExited(MouseEvent e) {        
+    }   
 
 }

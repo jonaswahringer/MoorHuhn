@@ -1,23 +1,21 @@
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.BoxLayout;
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JLayeredPane;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
 
 
 public class MenuPanel extends JPanel {
@@ -32,7 +30,7 @@ public class MenuPanel extends JPanel {
 
 	
 	public MenuPanel() {
-		this.setBounds(100,100,1000,700);;
+		this.setBounds(100,100,1000,700);
 		this.setBackground(Color.white);
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		initFile();
@@ -72,7 +70,6 @@ public class MenuPanel extends JPanel {
 		try {
 			background = ImageIO.read(bgImageFile);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -80,6 +77,7 @@ public class MenuPanel extends JPanel {
 	
 	public void startGame() {
 		new GameWindow();
+		System.out.println("alskfjaösldkflsdafjölskdfj");
 //		mw.getContentPane().removeAll();
 //		mw.revalidate();
 //		mw.repaint();
