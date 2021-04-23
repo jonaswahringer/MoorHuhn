@@ -28,7 +28,11 @@ public class MenuFrame extends JFrame {
 	Menu menu;
 	
 	public MenuFrame() {
+<<<<<<< HEAD
 		this.setBounds(400,200,1000,730);
+=======
+		this.setBounds(100,100,1000,730);
+>>>>>>> a01ff8a21d778a96f3b7518d3fa00a7a95b9936b
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		initFile();
 

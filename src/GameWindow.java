@@ -1,6 +1,11 @@
 import java.awt.CardLayout;
+<<<<<<< HEAD
 
 
+=======
+import java.awt.Dimension;
+
+>>>>>>> a01ff8a21d778a96f3b7518d3fa00a7a95b9936b
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
