@@ -60,7 +60,7 @@ public class MenuPanel extends JPanel {
 		settingsButton.addActionListener(new SettingsButtonListener());
 		settingsButton.setAlignmentX(CENTER_ALIGNMENT);
 		this.add(settingsButton, JLayeredPane.PALETTE_LAYER);		
-		
+
 		this.setVisible(true);
 	}
 

@@ -1,5 +1,5 @@
 import java.awt.CardLayout;
-import java.awt.Dimension;
+
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,7 +16,7 @@ public class GameWindow extends JFrame {
 
 	public GameWindow() {
 		super("Moorhuhn");
-		this.setBounds(100,100,1000,730);
+		this.setBounds(400,200,1000,730);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLayout(null);
@@ -28,23 +28,20 @@ public class GameWindow extends JFrame {
 		
 		JButton b = new JButton("Settings");
 		b.setBounds(100, 0, 100, 30);
-		b.setMinimumSize(new Dimension(30, 30));
 		this.add(b);
 		
 		mp = new GamePanel(this);
 		sp = new SettingsPanel(this);
 		lp = new LostPanel(this, myScore);
 		
-		
 		pane.add(mp, "Game");
 		pane.add(sp, "Settings");
 		pane.add(lp, "Lost");
 		
-		
 		cLay.show(pane, "Game");
 		
 		this.setContentPane(pane);
-		
+		// this.setUndecorated(true);
 		this.setVisible(true);
 	}
 	

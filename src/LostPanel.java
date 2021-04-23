@@ -45,6 +45,17 @@ public class LostPanel extends JPanel implements MouseListener {
         restartGameButton.setVisible(true);
 		this.add(restartGameButton);
 
+        JButton label = new JButton(Integer.toString(score));
+        label.setBounds(530, 300, 200, 150);
+		label.addActionListener(new restartButtonListener());
+        label.setBorder(BorderFactory.createEmptyBorder());
+        label.setOpaque(false);
+        label.setVisible(true);
+		this.add(label);
+
+        JLabel yourScore = new JLabel(Integer.toString(score));
+        this.add(yourScore);
+
         backgroundLabel.setBounds(0,0,1000,700);
         this.add(backgroundLabel);
         this.setVisible(true);
