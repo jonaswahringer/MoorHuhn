@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/Volumes/SSD/HTL/SEW/Moorhuhn/bin/mariadb-java-client-2.7.2.jar",
+        "/Volumes/SSD/HTL/SEW/Moorhuhn/database_client/mariadb-java-client-2.7.2.jar",
+    ]
+}
