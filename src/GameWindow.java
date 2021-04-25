@@ -1,31 +1,26 @@
 import java.awt.CardLayout;
-<<<<<<< HEAD
 
-
-=======
-import java.awt.Dimension;
-
->>>>>>> a01ff8a21d778a96f3b7518d3fa00a7a95b9936b
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class GameWindow extends JFrame {
-
 	JPanel pane;
 	GamePanel mp;
 	SettingsPanel sp;
 	LostPanel lp;
+	Login loginData;
 	CardLayout cLay;
-	int myScore;
 
-	public GameWindow() {
+	public GameWindow(Login login) {
 		super("Moorhuhn");
 		this.setBounds(400,200,1000,730);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLayout(null);
 		
+		this.loginData = login;
+
 		cLay = new CardLayout();
 		
 		pane = new JPanel();
@@ -35,9 +30,9 @@ public class GameWindow extends JFrame {
 		b.setBounds(100, 0, 100, 30);
 		this.add(b);
 		
-		mp = new GamePanel(this);
+		mp = new GamePanel(this, loginData);
 		sp = new SettingsPanel(this);
-		lp = new LostPanel(this, myScore);
+		lp = new LostPanel(this);
 		
 		pane.add(mp, "Game");
 		pane.add(sp, "Settings");
@@ -59,10 +54,14 @@ public class GameWindow extends JFrame {
 		mp.setFlying();
 	}
 
-	public void changeToLost(int score) {
-		System.out.println("LOST PANEL");
-		this.myScore = score;
+	public void changeToLost(String user, int score, Boolean isHighScore) {
+		lp.setFinalScore(user, score, isHighScore);
 		cLay.show(pane, "Lost");
+	}
+
+	public void newGame() {
+		mp = new GamePanel(this, loginData);
+		cLay.show(pane, "Game");
 	}
 
 }
