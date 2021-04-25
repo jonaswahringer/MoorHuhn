@@ -28,6 +28,12 @@ public class CheckLoginData {
                 setCheckedUname(checkNames[i]);
                 break;
             }
+            else {
+                dbc.createNewUser(inputName, inputPassword);
+                setCheckedHighscore(0);
+                setCheckedUname(inputName);
+                break;
+            }
         }
         
     }

@@ -7,7 +7,7 @@ show tables;
 create table user(
     username varchar(50) not null,
     userpassword varchar(50) not null,
-    highscore integer,
+    highscore integer default 0,
     primary key (username)
 );
 

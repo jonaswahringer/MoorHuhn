@@ -76,7 +76,19 @@ public class DatabaseConnection {
         } catch (SQLException e) { 
             e.printStackTrace();
         }
+    }
 
+    public void createNewUser(String username, String password) {
+        try {
+            connection=DriverManager.getConnection(url, user, pwd);
+            String query = "insert into user(username,userpassword) values(?,?)";
+            PreparedStatement preparedStmt = connection.prepareStatement(query);
+            preparedStmt.setString(1, username);
+            preparedStmt.setString(2, password);
+            preparedStmt.executeUpdate();
+        } catch (SQLException e) { 
+            e.printStackTrace();
+        }
     }
 
 
