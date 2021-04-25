@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 
 
 public class MenuFrame extends JFrame {
+	Login loginData;
 	BufferedImage backgroundImage, startImage, settingsImage, loginImage;
 	JLabel title, background;
 	JButton startGameButton, settingsButton, loginButton;
@@ -28,11 +29,7 @@ public class MenuFrame extends JFrame {
 	Menu menu;
 	
 	public MenuFrame() {
-<<<<<<< HEAD
-		this.setBounds(400,200,1000,730);
-=======
 		this.setBounds(100,100,1000,730);
->>>>>>> a01ff8a21d778a96f3b7518d3fa00a7a95b9936b
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		initFile();
 
@@ -69,7 +66,7 @@ public class MenuFrame extends JFrame {
 		loginButton.setBorder(BorderFactory.createEmptyBorder());
 		loginButton.setBounds(520,400,75,82);
 		loginButton.setOpaque(false);	
-		loginButton.addActionListener(new SettingsButtonListener());
+		loginButton.addActionListener(new LoginButtonListener());
 		loginButton.setVisible(true);
 		
 
@@ -87,7 +84,7 @@ public class MenuFrame extends JFrame {
 	}
 	
 	public void startGame() {
-		new GameWindow();
+		new GameWindow(loginData);
 		this.dispose();
 	}
 	
@@ -123,6 +120,16 @@ public class MenuFrame extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("No Settings available yet");
 			playClickSound();
+		}		
+	}
+
+	class LoginButtonListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			playClickSound();
+			loginData = new Login();
+			
 		}		
 	}
 	

@@ -18,20 +18,19 @@ import javax.swing.JPanel;
 
 public class LostPanel extends JPanel implements MouseListener {
     GameWindow gameWindow;
-    JLabel backgroundLabel;
-    BufferedImage background, restartImage;
-    int score;
+    JLabel backgroundLabel, scoreLabel;
     JButton restartGameButton;
+    BufferedImage background, restartImage;
+    String username;
+    int score;
+
     
-    public LostPanel(GameWindow gameWindow, int score) {
+    public LostPanel(GameWindow gameWindow) {
         this.setBounds(0, 100, 1000, 700);
         this.setLayout(null);
         initFile();
 
         this.gameWindow = gameWindow;
-        this.score = score;
-
-	    
 
 		backgroundLabel = new JLabel("",new ImageIcon(background),JLabel.CENTER);
         
@@ -45,7 +44,7 @@ public class LostPanel extends JPanel implements MouseListener {
         restartGameButton.setVisible(true);
 		this.add(restartGameButton);
 
-        JButton label = new JButton(Integer.toString(score));
+        JButton label = new JButton();
         label.setBounds(530, 300, 200, 150);
 		label.addActionListener(new restartButtonListener());
         label.setBorder(BorderFactory.createEmptyBorder());
@@ -53,8 +52,11 @@ public class LostPanel extends JPanel implements MouseListener {
         label.setVisible(true);
 		this.add(label);
 
-        JLabel yourScore = new JLabel(Integer.toString(score));
-        this.add(yourScore);
+        scoreLabel = new JLabel();
+        scoreLabel.setBounds(400, 350, 200, 200);
+        Font font = new Font("Courier", Font.BOLD,16);
+        scoreLabel.setFont(font);
+        this.add(scoreLabel);
 
         backgroundLabel.setBounds(0,0,1000,700);
         this.add(backgroundLabel);
@@ -75,16 +77,31 @@ public class LostPanel extends JPanel implements MouseListener {
         g.setFont(new Font("TimesRoman", Font.PLAIN, 50));
         g.setColor(Color.black);
         g.drawString("You Lost", 0, 0);
-        g.setFont(new Font("TimesRoman", Font.PLAIN, 25));
-        g.drawString("Score: " + Integer.toString(score), 0, 0);
+    }
+
+    public void setFinalScore(String user, int myscore, Boolean isHighScore) {
+        this.score=myscore;
+        this.username=user; 
+
+        if(isHighScore) {
+            scoreLabel.setText("New Highscore: " + Integer.toString(score));
+            alterUserHSC();
+        }
+        else {
+            scoreLabel.setText("Your score: " + Integer.toString(score));
+        }        
+    }
+
+    public void alterUserHSC() {
+        DatabaseConnection alter_dbc = new DatabaseConnection();
+        alter_dbc.alterHighscore(username, score);
     }
 
     public class restartButtonListener extends AbstractAction {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-            System.out.println("Restart Game");
-            //create new gamePanel object
+            gameWindow.newGame();
 		}
 
 	}

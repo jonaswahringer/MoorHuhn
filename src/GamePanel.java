@@ -32,6 +32,7 @@ import javax.swing.KeyStroke;
 
 public class GamePanel extends JPanel implements Runnable, MouseListener {
 	GameWindow gameWindow;
+	Login loginData;
 	BufferedImage background;
 	BufferedImage heart;
 	BufferedImage munition;
@@ -60,8 +61,10 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	long sleepTime=4000;
 	Boolean saveStand;
 	String savestandString;
+	String userName;
+	int userHighscore;
 
-	public GamePanel(GameWindow gameWindow) {
+	public GamePanel(GameWindow gameWindow, Login login) {
 		this.setBounds(0, 100, 1000, 700);
 		initFile();
 		setAttributeValues();
@@ -72,6 +75,10 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 		this.gameWindow = gameWindow;
 		this.addMouseListener(this);
+		
+		this.loginData = login;
+		userName = loginData.getFinalUsername();
+		userHighscore = loginData.getFinalHighscore();
 
 		Thread updateThread = new Thread(this);
 		updateThread.start();
@@ -101,6 +108,9 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 		g.setFont(new Font("TimesRoman", Font.PLAIN, 15));
 		g.drawString("Level: " + Integer.toString(difficultyLevel), 450, 65);
+
+		g.setFont(new Font("TimesRoman", Font.BOLD, 15));
+		g.drawString("Highscore of " + userName+ ": " + Integer.toString(userHighscore), 450, 95);
 
 	}
 
@@ -336,7 +346,13 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	public Boolean checkLives() {
 		if(livesAvailable == 0) {
 			isPlayerAlive=false;
-			gameWindow.changeToLost(score);
+			if(score>userHighscore) {
+				gameWindow.changeToLost(userName, score, true);
+			}
+			else {
+				gameWindow.changeToLost(userName, score, false);
+			}
+			
 		}
 		else {
 			
