@@ -11,8 +11,15 @@ create table user(
     primary key (username)
 );
 
-insert into user values('thedestroyer','123', 10);
-insert into user values('thedestroyer2','123', 11);
-insert into user values('thedestroyer3','123', 12);
+-- create table serialized(
+--     username varchar(50) not null,
+--     check_savestand boolean,
+--     score integer not null,
+--     lvl integer not null,
+--     lives_available integer not null,
+--     primary key(username),
+--     constraint fk_uname foreign key(username) 
+--     references user(username) on delete cascade on update cascade
+-- );
 
 select * from user;

@@ -21,7 +21,7 @@ public class CheckLoginData {
         String[] checkNames = dbc.getUserNames();
         String[] checkPW = dbc.getUserPasswords();
         int[] highscores = dbc.getHighscores();
-
+        
         for(int i=0; i<checkNames.length; i++) {
             if(checkNames[i].equals(inputName) & checkPW[i].equals(inputPassword)) {
                 setCheckedHighscore(highscores[i]);

@@ -66,7 +66,7 @@ public class LostPanel extends JPanel implements MouseListener {
     public void initFile() {
 		try {
 			background = ImageIO.read(new File("images/lost_screen.png"));
-            restartImage = ImageIO.read(new File("images/start.png"));
+            restartImage = ImageIO.read(new File("images/restart.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

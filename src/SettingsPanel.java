@@ -29,7 +29,7 @@ public class SettingsPanel extends JPanel implements Runnable {
 	GameWindow gameWindow;
 	JPanel mainPanel, topPanel;
 	Box box;
-	BufferedImage background, startImage, resumeImage, quitImage, quitSaveImage;
+	BufferedImage background, restartImage, resumeImage, quitImage, quitSaveImage;
 	JLayeredPane backgroundPane, itemPane;
 	JLabel gameTitle, backgroundLabel;
 	JButton resumeGameButton, settingsButton, aboutButton, restartGameButton, saveAndQuitButton, quitButton;
@@ -45,11 +45,10 @@ public class SettingsPanel extends JPanel implements Runnable {
 		
 		this.gameWindow = gameWindow; 
 		
-		
 		backgroundLabel = new JLabel();
 		backgroundLabel.setIcon(new ImageIcon(background));
 		
-		resumeGameButton = new JButton(new ImageIcon(startImage));
+		resumeGameButton = new JButton(new ImageIcon(resumeImage));
 		resumeGameButton.setBounds(400, 50, 200, 150);
 		resumeGameButton.addActionListener(new resumeButtonListener());
 		resumeGameButton.setBorder(BorderFactory.createEmptyBorder());
@@ -57,7 +56,7 @@ public class SettingsPanel extends JPanel implements Runnable {
         resumeGameButton.setVisible(true);
 		this.add(resumeGameButton);
 		
-		restartGameButton = new JButton(new ImageIcon(resumeImage));
+		restartGameButton = new JButton(new ImageIcon(restartImage));
 		restartGameButton.setBounds(400, 250, 200, 150);
 		restartGameButton.addActionListener(new restartButtonListener());
 		restartGameButton.setBorder(BorderFactory.createEmptyBorder());
@@ -198,8 +197,8 @@ public class SettingsPanel extends JPanel implements Runnable {
 	public void initFile() {
 		try {
 			background = ImageIO.read(new File("images/background.png"));
-            startImage = ImageIO.read(new File("images/start.png"));
-			resumeImage = ImageIO.read(new File("images/start.png"));
+			resumeImage = ImageIO.read(new File("images/resume.png"));
+			restartImage = ImageIO.read(new File("images/restart.png"));
 			quitSaveImage = ImageIO.read(new File("images/quit_and_save.png"));
 			quitImage = ImageIO.read(new File("images/quit.png"));
 		} catch (IOException e) {
