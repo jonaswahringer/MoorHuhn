@@ -37,7 +37,6 @@ public class CheckLoginData {
                 flag=true;
                 break;
             }
-            
         }
         if(!flag) {
             dbc.createNewUser(inputName, inputPassword);

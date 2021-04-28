@@ -60,6 +60,13 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 	public GamePanel(GameWindow gameWindow, Login login) {
 		this.setBounds(0, 100, 1000, 700);
+
+		this.loginData = login;
+		userName = loginData.getFinalUsername();
+		userHighscore = loginData.getFinalHighscore();
+
+		dbCon = new DatabaseConnection();
+
 		initFile();
 		setAttributeValues();
 		checkIfSerialized();
@@ -68,13 +75,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		setSaveStandToNo();
 
 		this.gameWindow = gameWindow;
-		this.addMouseListener(this);
-		
-		this.loginData = login;
-		userName = loginData.getFinalUsername();
-		userHighscore = loginData.getFinalHighscore();
-
-		dbCon = new DatabaseConnection();
+		this.addMouseListener(this);		
 
 		Thread updateThread = new Thread(this);
 		updateThread.start();
@@ -120,7 +121,6 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-	//			System.out.println("updated");
 	
 				for (int i = 0; i < chickenCount; i++) {
 					hitboxArray.get(i).setBounds(
@@ -161,7 +161,12 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		
 		userName = loginData.getFinalUsername();
 		userHighscore = loginData.getFinalHighscore();
-		deSerialize();
+
+		Boolean check = dbCon.checkIfUserSerialized(userName);
+		if(check) {
+			System.out.println("CHECK IS TRUE - DESERIALIZE");
+			deSerialize();
+		}
 	}
 
 	public void serialize() {
@@ -170,8 +175,9 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		serMap.put(3, score);
 		serMap.put(4, currentAmmo);
 		serMap.put(5, difficultyLevel);
-		
+
 		dbCon.writeHashMap(userName, serMap);
+		
 	}
 
 	private void deSerialize() {

@@ -84,11 +84,6 @@ public class MenuFrame extends JFrame {
 		this.setVisible(true);
 	}
 	
-	public void startGame() {
-		new GameWindow(loginData);
-		this.dispose();
-	}
-	
 	public void initFile() {
 		bgImageFile = new File("images/mh.png");
 		startImageFile = new File("images/start.png");
@@ -105,6 +100,10 @@ public class MenuFrame extends JFrame {
 		}
 	}
 	
+	public void startGame() {
+		new GameWindow(loginData);
+		this.dispose();
+	}
 
 	class StartButtonListener implements ActionListener {
 		

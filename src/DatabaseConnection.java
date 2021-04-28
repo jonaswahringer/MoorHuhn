@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DatabaseConnection {
@@ -98,56 +99,90 @@ public class DatabaseConnection {
             e.printStackTrace();
         }
     }
-    
-    public void writeHashMap(String username, HashMap<Integer, Object> objectToSerialize) {
 
+    public void alterSerializedUser(String username, HashMap<Integer, Object> objectToSerialize) {
         for(int h=1; h<=6; h++) {
-			switch(h) {
-				case 1: isSaved=(Boolean) objectToSerialize.get(1);
-				break;
+            switch(h) {
+                case 1: isSaved=(Boolean) objectToSerialize.get(1);
+                break;
                 case 2: livesAvailable=(int) objectToSerialize.get(2);
-				break;
-				case 3: score=(int) objectToSerialize.get(3);
-				break;
-				case 4: currentAmmo=(int) objectToSerialize.get(4);
-				break;
-				case 5: difficultyLevel = (int) objectToSerialize.get(5);
-				break;
-			}
-		}
-
+                break;
+                case 3: score=(int) objectToSerialize.get(3);
+                break;
+                case 4: currentAmmo=(int) objectToSerialize.get(4);
+                break;
+                case 5: difficultyLevel = (int) objectToSerialize.get(5);
+                break;
+            }
+        }
         try {
             connection=DriverManager.getConnection(url, user, pwd);
-            PreparedStatement pstmt = connection.prepareStatement(SQL_SERIALIZE_HASMAP);
-            pstmt.setString(1, username);
-		    pstmt.setBoolean(2, isSaved);
-            pstmt.setInt(3, livesAvailable);
-            pstmt.setInt(4, score);
-            pstmt.setInt(5, currentAmmo);
-            pstmt.setInt(6, difficultyLevel);
-            
-		    pstmt.executeUpdate();
-            pstmt.close();
-            System.out.println("Java object serialized to database. Object: "+ objectToSerialize);
+            String query = "UPDATE serialized SET check_savestand=?, lives_available=?, score=?, current_ammo=?, lvl=? WHERE username=?";
+            PreparedStatement preparedStmt = connection.prepareStatement(query);
+            preparedStmt.setBoolean(1, isSaved);
+            preparedStmt.setInt(2, livesAvailable);
+            preparedStmt.setInt(3, score);
+            preparedStmt.setInt(4, currentAmmo);
+            preparedStmt.setInt(5, difficultyLevel);
+            preparedStmt.setString(6, username);
+            preparedStmt.executeUpdate();
         } catch (SQLException e) { 
             e.printStackTrace();
         }
     }
 
+    public void createSerializedUser(String username, HashMap<Integer, Object> objectToSerialize) {
+        for(int h=1; h<=6; h++) {
+            switch(h) {
+                case 1: isSaved=(Boolean) objectToSerialize.get(1);
+                break;
+                case 2: livesAvailable=(int) objectToSerialize.get(2);
+                break;
+                case 3: score=(int) objectToSerialize.get(3);
+                break;
+                case 4: currentAmmo=(int) objectToSerialize.get(4);
+                break;
+                case 5: difficultyLevel = (int) objectToSerialize.get(5);
+                break;
+            }
+        }
+
+        try {
+            connection=DriverManager.getConnection(url, user, pwd);
+            PreparedStatement pstmt = connection.prepareStatement(SQL_SERIALIZE_HASMAP);
+            pstmt.setString(1, username);
+            pstmt.setBoolean(2, isSaved);
+            pstmt.setInt(3, livesAvailable);
+            pstmt.setInt(4, score);
+            pstmt.setInt(5, currentAmmo);
+            pstmt.setInt(6, difficultyLevel);
+            
+            pstmt.executeUpdate();
+            pstmt.close();
+            System.out.println("Java object serialized to database. Object: "+ objectToSerialize);
+        } catch (SQLException e) { 
+            e.printStackTrace();
+        }
+    } 
+    
+    public void writeHashMap(String username, HashMap<Integer, Object> objectToSerialize) {
+        if(checkIfUserSerialized(username)) {
+            // System.out.println("ASKLDFALSKDFJASLFKDJ");
+            alterSerializedUser(username, objectToSerialize);
+        }
+        else {
+            System.out.println("ASKLDFALSKDFJASLFKDJ");
+            createSerializedUser(username, objectToSerialize);
+        }
+    }
+
     public HashMap<Integer, Object> readHashMap(String username) {
-        System.out.println("USERNAMEEEEEE" + username);
         try {
             connection=DriverManager.getConnection(url, user, pwd);
             PreparedStatement pstmt = connection.prepareStatement(SQL_DESERIALIZE_HASHMAP);
             pstmt.setString(1, username);
             pstmt.executeUpdate();
             result = pstmt.executeQuery();
-
-            String query = "SELECT * FROM employee WHERE username=" + username;
-            //not working with username variable
-            Statement statement = connection.createStatement();
-            result = statement.executeQuery(query);
-            //SELECT * FROM serialized WHERE username='user';
 
             if(result.getRow() == 1) {
                 System.out.println("result: " + result.getBoolean("check_savestand"));
@@ -156,8 +191,8 @@ public class DatabaseConnection {
                 score = result.getInt("score");
                 currentAmmo = result.getInt("current_ammo");
                 difficultyLevel = result.getInt("lvl");
-
             }
+
             else {
                 result.next();
                 System.out.println("ROW" + result.getRow());
@@ -169,19 +204,9 @@ public class DatabaseConnection {
                 difficultyLevel = result.getInt("lvl");
             }
             
-
-            
-            
-            
-
             result.close();
             pstmt.close();
 
-            System.out.println(isSaved);
-            System.out.println(livesAvailable);
-            System.out.println(score);
-            System.out.println(currentAmmo);
-            System.out.println(difficultyLevel);
         } catch (SQLException e) { 
             e.printStackTrace();
         }
@@ -195,5 +220,34 @@ public class DatabaseConnection {
         deSerializedMap.put(5, difficultyLevel);
         
         return deSerializedMap;
+    }
+
+    public Boolean checkIfUserSerialized(String username) {
+        ArrayList<String> serializedUnames = new ArrayList<>();
+        Boolean checkFlag=false;
+        int i=0;
+
+        try {
+            connection=DriverManager.getConnection(url, user, pwd);
+            stm = connection.createStatement();
+            result = stm.executeQuery("select * from serialized");
+
+            while(result.next()) {
+                serializedUnames.add(i, result.getString("username"));
+                System.out.println(serializedUnames.get(i));
+                i++;
+        }
+        } catch(SQLException e) {
+            System.out.println(e);
+        }
+        
+        for(String uname : serializedUnames) {
+            if(uname.equals(username)) {
+                checkFlag=true;
+                break;
+            }
+        }
+
+        return checkFlag;
     }
 }
