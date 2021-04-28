@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 
 public class MenuFrame extends JFrame {
 	Login loginData;
+	Options optionsPanel;
 	BufferedImage backgroundImage, startImage, settingsImage, loginImage;
 	JLabel title, background;
 	JButton startGameButton, settingsButton, loginButton;
@@ -83,11 +84,6 @@ public class MenuFrame extends JFrame {
 		this.setVisible(true);
 	}
 	
-	public void startGame() {
-		new GameWindow(loginData);
-		this.dispose();
-	}
-	
 	public void initFile() {
 		bgImageFile = new File("images/mh.png");
 		startImageFile = new File("images/start.png");
@@ -104,6 +100,10 @@ public class MenuFrame extends JFrame {
 		}
 	}
 	
+	public void startGame() {
+		new GameWindow(loginData);
+		this.dispose();
+	}
 
 	class StartButtonListener implements ActionListener {
 		
@@ -118,7 +118,7 @@ public class MenuFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("No Settings available yet");
+			optionsPanel = new Options();
 			playClickSound();
 		}		
 	}
@@ -128,13 +128,11 @@ public class MenuFrame extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			playClickSound();
-			loginData = new Login();
-			
+			loginData = new Login();		
 		}		
 	}
 	
 	public void playClickSound() {
-
 		try {
 			audioIn = AudioSystem.getAudioInputStream(new File("sounds/click2.wav"));
 			clip = AudioSystem.getClip();
