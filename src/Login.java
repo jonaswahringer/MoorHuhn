@@ -28,16 +28,15 @@ public class Login extends JFrame {
 
         //user label
         userLabel = new JLabel();
-        userLabel.setText("User inputName :");
+        userLabel.setText("Name :");
         userNameText = new JTextField();
         userNameText.setText("Please enter your name");
 
         // Password Label
         passwordLabel = new JLabel();
-        passwordLabel.setText("inputPassword :");
+        passwordLabel.setText("Password :");
         passwordText = new JPasswordField();
-        passwordText.setText("12345");
-
+        passwordText.setText("123456");
         // Submit
         submitButton = new JButton("SUBMIT");
         submitButton.addActionListener(new submitButtonListener());

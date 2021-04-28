@@ -1,18 +1,11 @@
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -22,7 +15,7 @@ import javax.swing.KeyStroke;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GamePanel extends JPanel implements Runnable, MouseListener {
+public class GamePanel extends JPanel implements Runnable, MouseListener, KeyListener {
 	GameWindow gameWindow;
 	Login loginData;
 	DatabaseConnection dbCon;
@@ -41,9 +34,6 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	String userName;
 	Boolean isPlayerAlive = true;
 	Boolean bulletFlag=true;
-	Boolean saveStand=true;
-	int clickX = 0;
-	int clickY = 0;
 	int chickenCount;
 	int[] xValues = new int[100];
 	int[] yValues = new int[100];
@@ -72,16 +62,14 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		checkIfSerialized();
 		createChickens();
 		spawnNewChickens();
-		setSaveStandToNo();
 
 		this.gameWindow = gameWindow;
-		this.addMouseListener(this);		
+		this.addMouseListener(this);	
+		this.addKeyListener(this);	
 
 		Thread updateThread = new Thread(this);
 		updateThread.start();
-	}
-
-	
+	}	
 
 	public void paint(Graphics g) {
 		super.paintComponent(g);
@@ -145,17 +133,6 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 			
 	}
 
-	public void setSaveStandToNo() {
-		PrintWriter writer;
-		try {
-			writer = new PrintWriter("files/checkSaveStand.txt");
-			writer.print("no");
-			writer.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void checkIfSerialized() {
 		dbCon = new DatabaseConnection();
 		
@@ -170,11 +147,10 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	}
 
 	public void serialize() {
-		serMap.put(1, saveStand);
-		serMap.put(2, livesAvailable);
-		serMap.put(3, score);
-		serMap.put(4, currentAmmo);
-		serMap.put(5, difficultyLevel);
+		serMap.put(1, livesAvailable);
+		serMap.put(2, score);
+		serMap.put(3, currentAmmo);
+		serMap.put(4, difficultyLevel);
 
 		dbCon.writeHashMap(userName, serMap);
 		
@@ -185,14 +161,14 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 		for(int h=1; h<=6; h++) {
 			switch(h) {
-				case 1: this.livesAvailable=(int) serMap.get(2);
+				case 1: this.livesAvailable=(int) serMap.get(1);
 				break;
-				case 2: this.score=(int) serMap.get(3);
+				case 2: this.score=(int) serMap.get(2);
 				break;
-				case 3: this.currentAmmo=(int) serMap.get(4);
+				case 3: this.currentAmmo=(int) serMap.get(3);
 				break;
-				case 4: this.difficultyLevel = (int) serMap.get(5);
-				setLevel();
+				case 4: this.difficultyLevel = (int) serMap.get(4);
+				checkLvlUp();
 				break;
 			}
 		}
@@ -227,30 +203,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		}
 	}
 
-	public void setLevel() {
-		switch(difficultyLevel) {
-			case 1: sleepTime=4000;
-			break;
-			case 2: sleepTime=3000;
-			break;
-			case 3: sleepTime=2000;
-			break;
-			case 4: sleepTime=1500;
-			break;
-			case 5: sleepTime=1000;
-			break;
-			case 6: sleepTime=800;
-			break;
-			case 7: sleepTime=600;
-			break;
-			case 8: sleepTime=550;
-			break;
-			case 9: sleepTime=500;
-			break;
-			case 10: sleepTime=400;
-			break;
-		}
-	}
+	
 
 	public void setAttributeValues() {
 		chickenCount = 7;
@@ -278,6 +231,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	
 	public void spawnNewChickens() {
 		new Thread(()->{
+			int i=0;
 			while(true) {
 				try {
 					Thread.sleep(sleepTime);
@@ -287,13 +241,20 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 				int x = ThreadLocalRandom.current().nextInt(-40, 10 + 1);
 				int y = ThreadLocalRandom.current().nextInt(0+height, 700-height + 1);
 				int speed = ThreadLocalRandom.current().nextInt(1, 3 + 1);
-				Moorhuhn newHuhn = new Moorhuhn(x, y, speed);
+				Moorhuhn newHuhn;
+				if(i==10) {
+					newHuhn = new Bosshuhn(x, y, speed);
+				}
+				else {
+					newHuhn = new Moorhuhn(x, y, speed);
+				}
 				moorhuhnArray.add(newHuhn);
 				hitboxArray.add(new Rectangle(x, y, width, height));
 				Runnable animation = newHuhn.new Animation(newHuhn);
 				Thread animationThread = new Thread(animation);
 				animationThread.start();
 				chickenCount++;
+				i++;
 			}
 		}).start();
 	}
@@ -311,9 +272,11 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		if(livesAvailable == 0) {
 			isPlayerAlive=false;
 			if(score>userHighscore) {
+				dbCon.setValuesToDefault(userName);
 				gameWindow.changeToLost(userName, score, true);
 			}
 			else {
+				dbCon.setValuesToDefault(userName);
 				gameWindow.changeToLost(userName, score, false);
 			}
 			
@@ -334,44 +297,16 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		return isPlayerAlive;
 	}
 
-	public void checkAmmo() {
-		Timer timer = new Timer();
-		TimerTask task = new TimerTask() {
-			@Override
-			public void run() {
-				if(currentAmmo<3) {
-					currentAmmo++;
-					System.out.println(currentAmmo);
-				}
-			}
-		};
-		timer.schedule(task, 0, 10000);
-	}
-
 	public void checkLvlUp() {
-		switch(score) {
-			case 10: difficultyLevel=2;
-			break;
-			case 20: difficultyLevel=3;
-			break;
-			case 30: difficultyLevel=4;
-			break;
-			case 40: difficultyLevel=5;
-			break;
-			case 50: difficultyLevel=6;
-			break;
-			case 60: difficultyLevel=7;
-			break;
-			case 70: difficultyLevel=8;
-			break;
-			case 80: difficultyLevel=9;
-			break;
-			case 90: difficultyLevel=10;
-			break;
-			case 100: difficultyLevel=11;
-			break;
+		if(sleepTime>300) {
+			if(score%10 == 0) {
+				difficultyLevel++;
+				sleepTime-=300;
+			}
 		}
-		setLevel();
+		else {
+			sleepTime=300;
+		}	
 	}
 
 	@Override
@@ -392,11 +327,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 					checkLvlUp();
 				}
 			}
-			currentAmmo--;
-			if(currentAmmo==0) {
-				checkAmmo();
-			}
-			
+			currentAmmo--;			
 		}
 		else {
 			System.out.println("No ammo available right now");
@@ -413,6 +344,21 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 
 	@Override
 	public void mouseExited(MouseEvent e) {
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {	
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_R){
+            currentAmmo = 3;
+        }		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {		
 	}
 
 }

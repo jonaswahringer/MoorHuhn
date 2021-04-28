@@ -60,8 +60,9 @@ public class GameWindow extends JFrame {
 	}
 
 	public void newGame() {
-		mp = new GamePanel(this, loginData);
-		cLay.show(pane, "Game");
+		GamePanel np = new GamePanel(this, loginData);
+		pane.add(np, "NewPane");
+		cLay.show(pane, "NewPane");
 	}
 
 }

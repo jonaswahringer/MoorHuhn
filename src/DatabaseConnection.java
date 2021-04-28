@@ -17,10 +17,9 @@ public class DatabaseConnection {
     String[] userPasswords = new String[10];
     int[] highscores = new int[10];
 
-    Boolean isSaved;
     int score, livesAvailable, currentAmmo, difficultyLevel;
 
-    private static final String SQL_SERIALIZE_HASMAP = "INSERT INTO serialized(username, check_savestand, lives_available, score, current_ammo, lvl) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String SQL_SERIALIZE_HASMAP = "INSERT INTO serialized(username, lives_available, score, current_ammo, lvl) VALUES (?, ?, ?, ?, ?)";
     private static final String SQL_DESERIALIZE_HASHMAP = "SELECT * FROM serialized WHERE username=?";
 
     public DatabaseConnection() {
@@ -103,28 +102,25 @@ public class DatabaseConnection {
     public void alterSerializedUser(String username, HashMap<Integer, Object> objectToSerialize) {
         for(int h=1; h<=6; h++) {
             switch(h) {
-                case 1: isSaved=(Boolean) objectToSerialize.get(1);
+                case 1: livesAvailable=(int) objectToSerialize.get(1);
                 break;
-                case 2: livesAvailable=(int) objectToSerialize.get(2);
+                case 2: score=(int) objectToSerialize.get(2);
                 break;
-                case 3: score=(int) objectToSerialize.get(3);
+                case 3: currentAmmo=(int) objectToSerialize.get(3);
                 break;
-                case 4: currentAmmo=(int) objectToSerialize.get(4);
-                break;
-                case 5: difficultyLevel = (int) objectToSerialize.get(5);
+                case 4: difficultyLevel = (int) objectToSerialize.get(4);
                 break;
             }
         }
         try {
             connection=DriverManager.getConnection(url, user, pwd);
-            String query = "UPDATE serialized SET check_savestand=?, lives_available=?, score=?, current_ammo=?, lvl=? WHERE username=?";
+            String query = "UPDATE serialized SET lives_available=?, score=?, current_ammo=?, lvl=? WHERE username=?";
             PreparedStatement preparedStmt = connection.prepareStatement(query);
-            preparedStmt.setBoolean(1, isSaved);
-            preparedStmt.setInt(2, livesAvailable);
-            preparedStmt.setInt(3, score);
-            preparedStmt.setInt(4, currentAmmo);
-            preparedStmt.setInt(5, difficultyLevel);
-            preparedStmt.setString(6, username);
+            preparedStmt.setInt(1, livesAvailable);
+            preparedStmt.setInt(2, score);
+            preparedStmt.setInt(3, currentAmmo);
+            preparedStmt.setInt(4, difficultyLevel);
+            preparedStmt.setString(5, username);
             preparedStmt.executeUpdate();
         } catch (SQLException e) { 
             e.printStackTrace();
@@ -134,15 +130,13 @@ public class DatabaseConnection {
     public void createSerializedUser(String username, HashMap<Integer, Object> objectToSerialize) {
         for(int h=1; h<=6; h++) {
             switch(h) {
-                case 1: isSaved=(Boolean) objectToSerialize.get(1);
+                case 1: livesAvailable=(int) objectToSerialize.get(1);
                 break;
-                case 2: livesAvailable=(int) objectToSerialize.get(2);
+                case 2: score=(int) objectToSerialize.get(2);
                 break;
-                case 3: score=(int) objectToSerialize.get(3);
+                case 3: currentAmmo=(int) objectToSerialize.get(3);
                 break;
-                case 4: currentAmmo=(int) objectToSerialize.get(4);
-                break;
-                case 5: difficultyLevel = (int) objectToSerialize.get(5);
+                case 4: difficultyLevel = (int) objectToSerialize.get(4);
                 break;
             }
         }
@@ -151,11 +145,10 @@ public class DatabaseConnection {
             connection=DriverManager.getConnection(url, user, pwd);
             PreparedStatement pstmt = connection.prepareStatement(SQL_SERIALIZE_HASMAP);
             pstmt.setString(1, username);
-            pstmt.setBoolean(2, isSaved);
-            pstmt.setInt(3, livesAvailable);
-            pstmt.setInt(4, score);
-            pstmt.setInt(5, currentAmmo);
-            pstmt.setInt(6, difficultyLevel);
+            pstmt.setInt(2, livesAvailable);
+            pstmt.setInt(3, score);
+            pstmt.setInt(4, currentAmmo);
+            pstmt.setInt(5, difficultyLevel);
             
             pstmt.executeUpdate();
             pstmt.close();
@@ -167,11 +160,9 @@ public class DatabaseConnection {
     
     public void writeHashMap(String username, HashMap<Integer, Object> objectToSerialize) {
         if(checkIfUserSerialized(username)) {
-            // System.out.println("ASKLDFALSKDFJASLFKDJ");
             alterSerializedUser(username, objectToSerialize);
         }
         else {
-            System.out.println("ASKLDFALSKDFJASLFKDJ");
             createSerializedUser(username, objectToSerialize);
         }
     }
@@ -185,8 +176,6 @@ public class DatabaseConnection {
             result = pstmt.executeQuery();
 
             if(result.getRow() == 1) {
-                System.out.println("result: " + result.getBoolean("check_savestand"));
-                isSaved = result.getBoolean("check_savestand");
                 livesAvailable = result.getInt("lives_available");
                 score = result.getInt("score");
                 currentAmmo = result.getInt("current_ammo");
@@ -195,9 +184,6 @@ public class DatabaseConnection {
 
             else {
                 result.next();
-                System.out.println("ROW" + result.getRow());
-                System.out.println("result: " + result.getBoolean("check_savestand"));
-                isSaved = result.getBoolean("check_savestand");
                 livesAvailable = result.getInt("lives_available");
                 score = result.getInt("score");
                 currentAmmo = result.getInt("current_ammo");
@@ -213,11 +199,10 @@ public class DatabaseConnection {
 
         HashMap<Integer, Object> deSerializedMap = new HashMap<>();
 
-        deSerializedMap.put(1, isSaved);
-        deSerializedMap.put(2, livesAvailable);
-        deSerializedMap.put(3, score);
-        deSerializedMap.put(4, currentAmmo);
-        deSerializedMap.put(5, difficultyLevel);
+        deSerializedMap.put(1, livesAvailable);
+        deSerializedMap.put(2, score);
+        deSerializedMap.put(3, currentAmmo);
+        deSerializedMap.put(4, difficultyLevel);
         
         return deSerializedMap;
     }
@@ -249,5 +234,21 @@ public class DatabaseConnection {
         }
 
         return checkFlag;
+    }
+
+    public void setValuesToDefault(String username) {
+        try {
+            connection=DriverManager.getConnection(url, user, pwd);
+            String query = "UPDATE serialized SET lives_available=?, score=?, current_ammo=?, lvl=? WHERE username=?";
+            PreparedStatement preparedStmt = connection.prepareStatement(query);
+            preparedStmt.setInt(1, 3);
+            preparedStmt.setInt(2, 0);
+            preparedStmt.setInt(3, 3);
+            preparedStmt.setInt(4, 1);
+            preparedStmt.setString(5, username);
+            preparedStmt.executeUpdate();
+        } catch (SQLException e) { 
+            e.printStackTrace();
+        }
     }
 }

@@ -13,7 +13,6 @@ create table user(
 
 create table serialized(
     username varchar(50) not null,
-    check_savestand boolean,
     lives_available integer not null,
     score integer not null,
     current_ammo integer not null,
