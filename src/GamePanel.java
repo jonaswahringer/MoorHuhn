@@ -1,38 +1,31 @@
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
-
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import java.awt.*;
+import java.awt.event.*;
 
 public class GamePanel extends JPanel implements Runnable, MouseListener {
 	GameWindow gameWindow;
 	Login loginData;
+	DatabaseConnection dbCon;
 	BufferedImage background;
 	BufferedImage heart;
 	BufferedImage munition;
@@ -43,6 +36,12 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	ArrayList<Rectangle> hitboxArray = new ArrayList<>();
 	Point point;
 	Point click = new Point();
+	Action keyListener;
+	String savestandString;
+	String userName;
+	Boolean isPlayerAlive = true;
+	Boolean bulletFlag=true;
+	Boolean saveStand=true;
 	int clickX = 0;
 	int clickY = 0;
 	int chickenCount;
@@ -53,16 +52,11 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	int difficultyLevel=1;
 	int livesAvailable = 3;
 	int score=0;
-	Boolean isPlayerAlive = true;
-	Boolean bulletFlag=true;
 	int currentAmmo=3;
 	int count = 3;
-	Action keyListener;
-	long sleepTime=4000;
-	Boolean saveStand;
-	String savestandString;
-	String userName;
 	int userHighscore;
+	long sleepTime=4000;
+	
 
 	public GamePanel(GameWindow gameWindow, Login login) {
 		this.setBounds(0, 100, 1000, 700);
@@ -79,6 +73,8 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 		this.loginData = login;
 		userName = loginData.getFinalUsername();
 		userHighscore = loginData.getFinalHighscore();
+
+		dbCon = new DatabaseConnection();
 
 		Thread updateThread = new Thread(this);
 		updateThread.start();
@@ -161,75 +157,37 @@ public class GamePanel extends JPanel implements Runnable, MouseListener {
 	}
 
 	public void checkIfSerialized() {
-		File file = new File("files/checkSaveStand.txt");
-  
-		try {
-			br = new BufferedReader(new FileReader(file));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		dbCon = new DatabaseConnection();
 		
-		try {
-			savestandString = br.readLine();
-			System.out.println(savestandString);
-			if(savestandString.equals("yes")) {
-				deSerialize();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+		userName = loginData.getFinalUsername();
+		userHighscore = loginData.getFinalHighscore();
+		deSerialize();
 	}
 
 	public void serialize() {
-        try {
-			FileOutputStream fs = new FileOutputStream("files/serialized.txt");
-			ObjectOutputStream os = new ObjectOutputStream(fs);
-
-			serMap.put(1, livesAvailable);
-			serMap.put(2, score);
-			serMap.put(3, currentAmmo);
-			serMap.put(4, difficultyLevel);
-			// serMap.put(5, moorhuhnArray);
-			// serMap.put(6, hitboxArray);
-
-			os.writeObject(serMap);
-			os.close();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		serMap.put(1, saveStand);
+		serMap.put(2, livesAvailable);
+		serMap.put(3, score);
+		serMap.put(4, currentAmmo);
+		serMap.put(5, difficultyLevel);
+		
+		dbCon.writeHashMap(userName, serMap);
 	}
 
 	private void deSerialize() {
-		HashMap<Integer, Object> map = null;
-		// ArrayList<Moorhuhn> tempMoorhuhns =  new ArrayList<>();
-		// ArrayList<Rectangle> tempHitboxen = new ArrayList<>();
-
-		try {
-                FileInputStream fis = new FileInputStream("files/serialized.txt");
-                ObjectInputStream ois = new ObjectInputStream(fis);
-
-				map = (HashMap<Integer, Object>) ois.readObject();				
-                ois.close();
-        }
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		serMap = dbCon.readHashMap(userName);
 
 		for(int h=1; h<=6; h++) {
 			switch(h) {
-				case 1: this.livesAvailable=(int) map.get(1);
+				case 1: this.livesAvailable=(int) serMap.get(2);
 				break;
-				case 2: this.score=(int) map.get(2);
+				case 2: this.score=(int) serMap.get(3);
 				break;
-				case 3: this.currentAmmo=(int) map.get(3);
+				case 3: this.currentAmmo=(int) serMap.get(4);
 				break;
-				case 4: this.difficultyLevel = (int) map.get(4);
+				case 4: this.difficultyLevel = (int) serMap.get(5);
 				setLevel();
 				break;
-				// case 5: tempMoorhuhns = (Arraylist<Rectangle>) map.get(5);
-				// break;
 			}
 		}
 

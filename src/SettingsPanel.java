@@ -137,7 +137,6 @@ public class SettingsPanel extends JPanel implements Runnable {
 
 		public void actionPerformed(ActionEvent event) {
 			gameWindow.mp.serialize();
-			setIsSerialized();
 			System.out.println("OBJCETS SHOULD BE SERIALIZED");
 			playClickSound();
 			System.exit(0);
@@ -148,19 +147,6 @@ public class SettingsPanel extends JPanel implements Runnable {
 			}
 			System.out.println("Quit with Save");
 	    }
-
-		public void setIsSerialized() {
-			File file = new File("files/checkSaveStand.txt");
-  
-			try {
-				bwr = new BufferedWriter(new FileWriter(file));
-				bwr.write("yes");
-				bwr.close();
-				System.out.println("CHECK SAVE STAND SHOULD BE TRUE");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		
 	}
 	
